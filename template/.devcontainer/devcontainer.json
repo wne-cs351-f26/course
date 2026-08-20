@@ -1,0 +1,10 @@
+{
+  "name": "CS351",
+  "image": "ghcr.io/ourplcc/devcontainers/plcc-ng:2",
+  "postCreateCommand": "bash .devcontainer/setup.bash",
+  "customizations": {
+    "vscode": {
+      "extensions": ["jebbs.plantuml"]
+    }
+  }
+}

@@ -1,0 +1,17 @@
+define c1 = class
+    field x
+    method init = proc(x) {set <this>x = x ; this}
+end
+
+define c2 = class extends c1
+    field x
+    method init = proc(x) {
+        .<super>init(add1(x)) ;
+        set <this>x = x ;
+        this
+    }
+end
+
+define o = .<new c2>init(3)
+<o>x
+<<o>super>x

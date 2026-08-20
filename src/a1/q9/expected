@@ -1,0 +1,3 @@
+skip WS '\s+'
+token HI 'hi'
+token BYE 'bye'

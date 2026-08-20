@@ -1,0 +1,23 @@
+define c1 = class
+    field x
+    method init = proc(x) {set <this>x = x ; self}
+    method template = proc() {
+        .<self>update() ;
+        x
+    }
+    method update = proc() {
+        set x = add1(x)
+    }
+end
+
+define c2 = class extends c1
+    method update = proc() {
+        set x = *(x, x)
+    }
+end
+
+define o1 = .<new c1>init(3)
+define o2 = .<new c2>init(3)
+
+.<o1>template()
+.<o2>template()  % deep binding

@@ -1,0 +1,9 @@
+define x = 11
+define y = 42
+define z = 666
+define xyenv =
+    let
+        x = 3
+        y = 5
+    in
+        @@

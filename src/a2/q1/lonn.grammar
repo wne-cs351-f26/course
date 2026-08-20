@@ -1,0 +1,52 @@
+# Language LONN (nonempty list of numbers)
+
+# Lexical specification
+skip WHITESPACE '\s+'
+LPAREN '\('
+RPAREN '\)'
+NUM '\d+'
+%
+# Grammar
+<lon>           ::= LPAREN <NUM> <nums> RPAREN
+<nums>:NumsNode ::= <NUM> <nums>
+<nums>:NumsNull ::=
+%
+
+# add a toString method to the Lon class
+Lon
+%%%
+  public void $run() {
+    int m = min();
+    System.out.println("" + m);
+  }
+
+  public int min() {
+    int minSoFar = Integer.parseInt(num.toString());
+    return nums.min(minSoFar); // get the overall minimum
+  }
+%%%
+
+Nums
+%%%
+// Return the minimum of the values in Nums and minSoFar.
+public abstract int min(int minSoFar);
+%%%
+
+NumsNode
+%%%
+// Remember, a NumsNode has two attributes: num and nums.
+// num is a Token, and nums is a Nums. You need to get the minimum value
+// of nums, and then return the minimum of that value, num, and minSoFar.
+public int min(int minSoFar) {
+  return 0; // This is just a stub. Replace it with your implementation.
+}
+%%%
+
+NumsNull
+%%%
+// Remember this node doesn't have a value. So what is the minimum
+// of just one value?
+public int min(int minSoFar) {
+  return 0; // This is just a stub. Replace it with your implementation.
+}
+%%%

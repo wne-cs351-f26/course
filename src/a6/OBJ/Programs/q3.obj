@@ -1,0 +1,19 @@
+define A = class
+  static x = 0
+end
+
+define B = class extends A
+  static x = 1
+  field x
+
+  % Modify so field x is assigned value in the passed x.
+  method foo = proc(x) set x = x
+end
+
+define C = class extneds B
+  field x
+
+  method init = proc() { set x = 3 ; this}
+end
+
+% Add code to test your solution

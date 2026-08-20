@@ -1,0 +1,26 @@
+define c = class
+  % declare a field x
+  field x
+
+  % declare a constructor
+  method init = proc(x) {
+    set <this>x = x ;
+    % make constructor "friendlier" to use
+    this
+  }
+
+  % declare a getX
+  method getX = proc() {
+    x
+  }
+
+  % declare a setX
+  method setX = proc(x) {
+    set <this>x = x
+  }
+end
+
+% test - update as we go
+define o = .<new c>init(3)
+.<o>setX(5)
+.<o>getX()

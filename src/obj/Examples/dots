@@ -1,0 +1,30 @@
+
+
+let
+    x = 3
+    c = class
+      static x={@@; 2}
+      static f=proc(x) x
+    end
+in
+    .<c>f(x)
+    % <c>.f(x)
+
+
+
+
+
+
+
+
+% <exp>:EnvExp ::= LANGLE <exp>vExp RANGLE <exp>eExp
+% In ".<c>f(x)", f is a VarExp, so it is eExp.
+
+% In "<c>.f(x)", . is not an expression on its own. It is the start
+% of an AppExp. And an AppExp is "DOT <exp> LPAREN <rands> RPAREN".
+% So in "<c>.f(x)", ".f(x)" is the expression that follows <c>. So that
+% expression is evaluated inside of c's environment!
+
+% We can rewrite it to make it more clear: <c>{.f(x)}
+
+% Notice we could not write <c>{.}f(x) because . is not an expression.

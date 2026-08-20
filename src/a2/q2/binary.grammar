@@ -1,0 +1,18 @@
+# BINARY
+# Lexical specification
+
+# First create an input file with some example programs.
+# Then add skip and token rules, one at a time, and test them against your
+# input as you go.
+
+
+%
+# Syntactic specification
+
+# Uncomment the rules below when you are ready to start work on this section.
+
+# <binary> ::= <bits> NL
+# <bits>  **= <bit>
+
+%
+# Semantic specification

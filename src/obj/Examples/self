@@ -1,0 +1,20 @@
+define c1 = class
+    field x
+    method init = proc(x) {set <this>x = x ; this}
+    method getThisX = proc() <this>x
+    method getSelfX = proc() <self>x
+end
+
+define c2 = class extends c1
+    field x
+    method init = proc(x) {
+        .<super>init(add1(x)) ;
+        set <this>x = x ;
+        this
+    }
+end
+
+define o = .<new c2>init(3)
+
+.<o>getThisX()  % shallow binding
+.<o>getSelfX()  % deep binding

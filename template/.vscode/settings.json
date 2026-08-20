@@ -1,0 +1,9 @@
+{
+    "plantuml.commandArgs": [
+    ],
+    "plantuml.server": "http://www.plantuml.com/plantuml",
+    "plantuml.render": "PlantUMLServer",
+    "files.insertFinalNewline": true,
+    "files.trimFinalNewlines": false,
+    "files.trimTrailingWhitespace": true
+}

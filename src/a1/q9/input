@@ -1,0 +1,5 @@
+skip WS '\s+'
+# I have too much to do, so I'm not going to use the token keyword.
+HI 'hi'
+# OK, I have time to type this one.
+token BYE 'bye'
