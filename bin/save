@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+# Commit and push the student's work.
+#
+# Every git invocation is pinned with -C to the student's repository. The
+# previous version left `pull` and `push` unpinned, so running save from
+# inside a nested clone acted on the wrong repository.
+set -euo pipefail
+
+CS351_REPO_ROOT="${CS351_REPO_ROOT:-$PWD}"
+
+
+main() {
+    if ! save "$@"; then
+        report-error
+        return 1
+    fi
+    echo "Saved."
+    return 0
+}
+
+
+save() {
+    local message
+    if [[ $# -eq 0 ]]; then
+        message="save"
+    else
+        message="$*"
+    fi
+
+    git -C "${CS351_REPO_ROOT}" add . \
+        && git -C "${CS351_REPO_ROOT}" commit --allow-empty -m "${message}" \
+        && git -C "${CS351_REPO_ROOT}" pull --no-rebase \
+        && git -C "${CS351_REPO_ROOT}" push
+}
+
+
+report-error() {
+    >&2 echo "
+        ERROR: Could not save your work.
+
+                Please ask your instructor for help.
+                If your instructor cannot see your screen,
+                take screen-shots to capture the error messages
+                above and give them to your instructor.
+    "
+}
+
+
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main "$@"
+fi

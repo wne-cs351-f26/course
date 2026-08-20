@@ -1,0 +1,147 @@
+#!/usr/bin/env bash
+# Copy an assignment's starter files into the student's repository and
+# record a pristine baseline.
+#
+# The baseline is a filesystem copy under .cs351/pristine/, not a git
+# commit, so that recording it does not depend on the repository being in
+# a clean state. The commit is best-effort on top of that.
+set -euo pipefail
+
+BEGIN_BRANCH="${BEGIN_BRANCH:-main}"
+CS351_REPO_ROOT="${CS351_REPO_ROOT:-$PWD}"
+CS351_COURSE="${CS351_COURSE:-$HOME/.local/share/cs351/course}"
+
+
+main() {
+    if [[ $# -lt 1 ]]; then
+        display-usage
+        return 0
+    fi
+
+    FORCE=False
+    if [[ "${1}" == "-f" ]]; then
+        FORCE=True
+        shift
+    fi
+
+    if [[ $# -lt 1 ]]; then
+        display-usage
+        return 0
+    fi
+
+    ASSIGNMENT="${1}"
+
+    assert-repo-usable
+
+    update-course
+
+    local source="${CS351_COURSE}/src/${ASSIGNMENT}"
+    if [[ ! -d "${source}" ]]; then
+        >&2 echo "ERROR: No such assignment: ${ASSIGNMENT}"
+        >&2 echo ""
+        >&2 echo "Available assignments:"
+        >&2 list-assignments
+        return 1
+    fi
+
+    local dest="${CS351_REPO_ROOT}/${ASSIGNMENT}"
+    if [[ -e "${dest}" && "${FORCE}" != "True" ]]; then
+        >&2 echo "ERROR: ${ASSIGNMENT} already exists in your repository."
+        >&2 echo "Use 'begin -f ${ASSIGNMENT}' to overwrite it."
+        >&2 echo "WARNING: -f discards your changes to those files."
+        return 1
+    fi
+
+    cp -R "${source}" "${CS351_REPO_ROOT}/"
+    record-pristine "${ASSIGNMENT}"
+    commit-pristine "${ASSIGNMENT}" || warn-commit-failed "${ASSIGNMENT}"
+
+    echo "Started ${ASSIGNMENT}. Edit the files in ${ASSIGNMENT}/, then run 'save'."
+}
+
+
+# Refuse before touching any files if the repository is mid-merge or
+# mid-rebase. Committing is impossible in that state, and a student is
+# not equipped to resolve it under time pressure.
+assert-repo-usable() {
+    local git_dir
+    if ! git_dir="$(git -C "${CS351_REPO_ROOT}" rev-parse --git-dir 2>/dev/null)"; then
+        >&2 echo "ERROR: ${CS351_REPO_ROOT} is not a git repository."
+        return 1
+    fi
+    git_dir="$(cd "${CS351_REPO_ROOT}" && cd "${git_dir}" && pwd)"
+
+    if [[ -e "${git_dir}/MERGE_HEAD" ]] \
+       || [[ -d "${git_dir}/rebase-merge" ]] \
+       || [[ -d "${git_dir}/rebase-apply" ]] \
+       || [[ -n "$(git -C "${CS351_REPO_ROOT}" ls-files -u)" ]]; then
+        >&2 echo "ERROR: Your repository has an unfinished merge."
+        >&2 echo ""
+        >&2 echo "Nothing has been changed. Please show this message to your"
+        >&2 echo "instructor -- do not try to fix it yourself."
+        return 1
+    fi
+}
+
+
+update-course() {
+    git -C "${CS351_COURSE}" checkout --quiet "${BEGIN_BRANCH}"
+    git -C "${CS351_COURSE}" pull --quiet --ff-only || true
+}
+
+
+record-pristine() {
+    local assignment="${1}"
+    local pristine="${CS351_REPO_ROOT}/.cs351/pristine/${assignment}"
+    rm -rf "${pristine}"
+    mkdir -p "$(dirname "${pristine}")"
+    cp -R "${CS351_COURSE}/src/${assignment}" "${pristine}"
+}
+
+
+commit-pristine() {
+    local assignment="${1}"
+    git -C "${CS351_REPO_ROOT}" add \
+        "${assignment}" ".cs351/pristine/${assignment}" \
+        && git -C "${CS351_REPO_ROOT}" commit --quiet --only \
+            "${assignment}" ".cs351/pristine/${assignment}" \
+            -m "chore: begin ${assignment}"
+}
+
+
+warn-commit-failed() {
+    >&2 echo "NOTE: Could not commit the starter files for ${1}."
+    >&2 echo "Your files were copied successfully. Run 'save' when ready."
+}
+
+
+display-usage() {
+    >&2 echo "
+begin [-f] ASSIGNMENT
+
+    Copies the starter files for ASSIGNMENT into your repository.
+
+    Refuses if ASSIGNMENT already exists, unless -f is given.
+    -f overwrites, discarding your changes to those files.
+
+Available assignments:
+
+$(list-assignments)
+"
+}
+
+
+list-assignments() {
+    local out
+    out="$(ls "${CS351_COURSE}/src/" 2>/dev/null || true)"
+    if [[ -z "${out}" ]]; then
+        echo "(none -- could not read ${CS351_COURSE}/src/)"
+    else
+        echo "${out}"
+    fi
+}
+
+
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main "$@"
+fi
