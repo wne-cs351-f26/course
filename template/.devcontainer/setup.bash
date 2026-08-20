@@ -16,9 +16,16 @@ else
     git clone --quiet "${COURSE_URL}" "${COURSE_DIR}"
 fi
 
+shopt -s nullglob
+linked=0
 for command in "${COURSE_DIR}"/bin/*; do
     ln -sf "${command}" "${HOME}/.local/bin/$(basename "${command}")"
+    linked=$((linked + 1))
 done
+
+if [[ "${linked}" -eq 0 ]]; then
+    echo "No CS351 commands found. 'begin' and 'save' will not work — tell your instructor." >&2
+fi
 
 {
     echo "export CS351_COURSE=\"${COURSE_DIR}\""
