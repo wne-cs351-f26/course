@@ -135,3 +135,98 @@ def test_save_commits_in_repo_root_not_cwd(student, course, tmp_path):
     assert "my message" in log
     nested_log = git(nested, "log", "--oneline", "-1").stdout
     assert "my message" not in nested_log
+
+
+def run_save(repo, *args):
+    env = dict(os.environ, CS351_REPO_ROOT=str(repo))
+    return subprocess.run([os.path.join(BIN, "save")] + list(args),
+                          capture_output=True, text=True, env=env, cwd=str(repo))
+
+
+def test_save_refuses_when_repo_already_conflicted(student, course):
+    """Direct check of the new pre-flight guard, mirroring begin's own test."""
+    (student / "shared.txt").write_text("base\n")
+    git(student, "add", "-A"); git(student, "commit", "-q", "-m", "base")
+    git(student, "checkout", "-qb", "other")
+    (student / "shared.txt").write_text("theirs\n")
+    git(student, "commit", "-qam", "theirs")
+    git(student, "checkout", "-q", "main")
+    (student / "shared.txt").write_text("mine\n")
+    git(student, "commit", "-qam", "mine")
+    git(student, "merge", "other")
+
+    before = git(student, "rev-parse", "HEAD").stdout.strip()
+
+    r = run_save(student, "retry")
+
+    assert r.returncode != 0
+    assert "again" in r.stderr.lower()
+    # Nothing was committed or resolved -- save must not have touched the
+    # merge state at all (the conflicted path already shows up in `git
+    # diff --cached` as an inherent artifact of an in-progress merge, so
+    # that is not itself evidence of anything save did).
+    after = git(student, "rev-parse", "HEAD").stdout.strip()
+    assert after == before
+    assert "<<<<<<<" in (student / "shared.txt").read_text()
+    unmerged = git(student, "ls-files", "-u").stdout
+    assert "shared.txt" in unmerged
+
+
+def test_save_does_not_push_conflict_markers_on_retry(student, tmp_path):
+    """End-to-end reproduction of the reported failure:
+
+    1. The remote diverges (another codespace / the instructor pushes).
+    2. save's own `git pull --no-rebase` conflicts; save must fail without
+       pushing.
+    3. On retry, save must refuse -- not stage the conflict markers as a
+       resolved commit and push them.
+    """
+    bare = tmp_path / "remote.git"
+    subprocess.run(["git", "init", "-q", "--bare", "-b", "main", str(bare)],
+                   check=True)
+
+    (student / "shared.txt").write_text("base\n")
+    git(student, "add", "-A")
+    git(student, "commit", "-q", "-m", "base")
+    git(student, "remote", "add", "origin", str(bare))
+    push = git(student, "push", "-q", "-u", "origin", "main")
+    assert push.returncode == 0, push.stderr
+
+    other = tmp_path / "other"
+    clone = subprocess.run(["git", "clone", "-q", str(bare), str(other)],
+                           capture_output=True, text=True)
+    assert clone.returncode == 0, clone.stderr
+    git(other, "config", "user.email", "o@o.o")
+    git(other, "config", "user.name", "o")
+    (other / "shared.txt").write_text("instructor version\n")
+    git(other, "commit", "-qam", "instructor edit")
+    other_push = git(other, "push", "-q")
+    assert other_push.returncode == 0, other_push.stderr
+
+    # The student edits the same file locally without ever pulling.
+    (student / "shared.txt").write_text("student version\n")
+
+    first = run_save(student, "attempt1")
+    assert first.returncode != 0
+
+    remote_log_after_first = git(bare, "log", "--oneline", "-1", "main").stdout
+    assert "instructor edit" in remote_log_after_first
+    assert "attempt1" not in remote_log_after_first
+
+    head_after_first = git(student, "rev-parse", "HEAD").stdout.strip()
+
+    # The reflex under deadline pressure: run save again.
+    second = run_save(student, "attempt2")
+    assert second.returncode != 0
+    assert "again" in second.stderr.lower()
+
+    # Nothing new was committed or pushed, and the file on disk still shows
+    # unresolved conflict markers rather than a silently "resolved" version.
+    head_after_second = git(student, "rev-parse", "HEAD").stdout.strip()
+    assert head_after_second == head_after_first
+
+    remote_log_after_second = git(bare, "log", "--oneline", "-1", "main").stdout
+    assert "instructor edit" in remote_log_after_second
+    assert "attempt2" not in remote_log_after_second
+
+    assert "<<<<<<<" in (student / "shared.txt").read_text()

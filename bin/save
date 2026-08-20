@@ -8,14 +8,51 @@ set -euo pipefail
 
 CS351_REPO_ROOT="${CS351_REPO_ROOT:-$PWD}"
 
+# Resolve our own real location (save is symlinked onto PATH from
+# ~/.local/bin, so BASH_SOURCE alone would point at the symlink's
+# directory, not here) so we can find the shared library next to us.
+_self="$(readlink -f "${BASH_SOURCE[0]}")"
+source "$(dirname "${_self}")/.cs351-lib.bash"
+
 
 main() {
+    if ! assert-repo-usable; then
+        return 1
+    fi
+
     if ! save "$@"; then
         report-error
         return 1
     fi
     echo "Saved."
     return 0
+}
+
+
+# Refuse before staging anything if the repository already has an
+# unresolved conflict or an in-progress merge/rebase on entry. This checks
+# only the state that exists when save STARTS -- save's own `git pull
+# --no-rebase` below may legitimately create a merge that resolves
+# cleanly, and that must keep working. What must never happen is `git add
+# .` staging leftover conflict markers from an *earlier* failed pull as if
+# they were a resolved answer, then committing and pushing them.
+assert-repo-usable() {
+    if ! cs351_is_git_repo "${CS351_REPO_ROOT}"; then
+        >&2 echo "ERROR: ${CS351_REPO_ROOT} is not a git repository."
+        return 1
+    fi
+
+    if cs351_repo_has_unfinished_merge "${CS351_REPO_ROOT}"; then
+        >&2 echo "ERROR: Your repository already has an unresolved conflict from"
+        >&2 echo "an earlier merge."
+        >&2 echo ""
+        >&2 echo "Your work is not lost -- it is still on disk. But 'save' cannot"
+        >&2 echo "commit it safely, and running 'save' again will NOT fix this: it"
+        >&2 echo "would commit the conflict markers as if they were your answer."
+        >&2 echo ""
+        >&2 echo "Please show this message to your instructor for help resolving it."
+        return 1
+    fi
 }
 
 

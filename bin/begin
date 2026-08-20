@@ -11,6 +11,12 @@ BEGIN_BRANCH="${BEGIN_BRANCH:-main}"
 CS351_REPO_ROOT="${CS351_REPO_ROOT:-$PWD}"
 CS351_COURSE="${CS351_COURSE:-$HOME/.local/share/cs351/course}"
 
+# Resolve our own real location (begin is symlinked onto PATH from
+# ~/.local/bin, so BASH_SOURCE alone would point at the symlink's
+# directory, not here) so we can find the shared library next to us.
+_self="$(readlink -f "${BASH_SOURCE[0]}")"
+source "$(dirname "${_self}")/.cs351-lib.bash"
+
 
 main() {
     if [[ $# -lt 1 ]]; then
@@ -64,17 +70,12 @@ main() {
 # mid-rebase. Committing is impossible in that state, and a student is
 # not equipped to resolve it under time pressure.
 assert-repo-usable() {
-    local git_dir
-    if ! git_dir="$(git -C "${CS351_REPO_ROOT}" rev-parse --git-dir 2>/dev/null)"; then
+    if ! cs351_is_git_repo "${CS351_REPO_ROOT}"; then
         >&2 echo "ERROR: ${CS351_REPO_ROOT} is not a git repository."
         return 1
     fi
-    git_dir="$(cd "${CS351_REPO_ROOT}" && cd "${git_dir}" && pwd)"
 
-    if [[ -e "${git_dir}/MERGE_HEAD" ]] \
-       || [[ -d "${git_dir}/rebase-merge" ]] \
-       || [[ -d "${git_dir}/rebase-apply" ]] \
-       || [[ -n "$(git -C "${CS351_REPO_ROOT}" ls-files -u)" ]]; then
+    if cs351_repo_has_unfinished_merge "${CS351_REPO_ROOT}"; then
         >&2 echo "ERROR: Your repository has an unfinished merge."
         >&2 echo ""
         >&2 echo "Nothing has been changed. Please show this message to your"
@@ -84,9 +85,27 @@ assert-repo-usable() {
 }
 
 
+# Both failure modes here get a student-facing message and suppressed raw
+# git chatter, but they differ in severity: a checkout failure (e.g. a
+# misconfigured BEGIN_BRANCH) means we cannot trust anything under
+# CS351_COURSE/src, so it is fatal. A failed pull just means the content on
+# disk might be stale -- worth a loud warning, but stale files still beat
+# no files, so it is not fatal.
 update-course() {
-    git -C "${CS351_COURSE}" checkout --quiet "${BEGIN_BRANCH}"
-    git -C "${CS351_COURSE}" pull --quiet --ff-only || true
+    if ! git -C "${CS351_COURSE}" checkout --quiet "${BEGIN_BRANCH}" >/dev/null 2>&1; then
+        >&2 echo "ERROR: Could not switch course materials to branch '${BEGIN_BRANCH}'."
+        >&2 echo ""
+        >&2 echo "Nothing has been changed. Please show this message to your"
+        >&2 echo "instructor -- do not try to fix it yourself."
+        return 1
+    fi
+
+    if ! git -C "${CS351_COURSE}" pull --quiet --ff-only >/dev/null 2>&1; then
+        >&2 echo "WARNING: Could not refresh course materials (no network, or the"
+        >&2 echo "course repository could not be fast-forwarded)."
+        >&2 echo "Continuing with what is already on disk -- your assignment files"
+        >&2 echo "may be out of date. If something looks wrong, tell your instructor."
+    fi
 }
 
 
