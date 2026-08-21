@@ -1,0 +1,6 @@
+# Python bytecode from running the CLI tests.
+__pycache__/
+*.pyc
+
+# pytest
+.pytest_cache/
