@@ -13,6 +13,8 @@ instructor can see it.
 
 - `begin <assignment>` — copy an assignment's starter files into this
   repository. Run `begin` with no arguments to list what is available.
+  Assignments appear here as they are released; if one you expect is
+  missing, it has not been released yet.
 - `save [message]` — commit and push your work. **Your work is not
   submitted until you run this.**
 

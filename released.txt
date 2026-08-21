@@ -1,0 +1,15 @@
+# What students may fetch with `begin`. One name per line; `#` starts a comment.
+#
+# `begin` lists only what appears here, and refuses anything in src/ that does
+# not. That is deliberate: an unreleased assignment may still change, and
+# because `begin` copies files rather than tracking them, a student who starts
+# early would be working against a moving target with no way to be notified.
+#
+# To release something: add its line, commit, push. `begin` pulls on every run,
+# so it takes effect the next time any student runs it. No student action needed.
+#
+# To rehearse something unreleased: add it to released.txt on a branch, then set
+# BEGIN_BRANCH to that branch in your rehearsal repository. Students on `main`
+# are unaffected.
+
+a1

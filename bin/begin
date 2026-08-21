@@ -50,6 +50,20 @@ main() {
         return 1
     fi
 
+    # Refuse anything not yet released. An unreleased assignment may still
+    # change, and begin copies rather than tracks, so a student who started
+    # early would work against a moving target with no way to be notified.
+    if ! is-released "${ASSIGNMENT}"; then
+        >&2 echo "ERROR: ${ASSIGNMENT} has not been released yet."
+        >&2 echo ""
+        >&2 echo "It may still change before it is assigned, so starting it now"
+        >&2 echo "could mean redoing your work. Nothing has been changed."
+        >&2 echo ""
+        >&2 echo "Available now:"
+        >&2 list-assignments
+        return 1
+    fi
+
     local dest="${CS351_REPO_ROOT}/${ASSIGNMENT}"
     if [[ -e "${dest}" && "${FORCE}" != "True" ]]; then
         >&2 echo "ERROR: ${ASSIGNMENT} already exists in your repository."
@@ -150,11 +164,26 @@ $(list-assignments)
 }
 
 
+# Names listed in the course repository's released.txt, one per line, with
+# comments and blank lines stripped.
+released-items() {
+    local manifest="${CS351_COURSE}/released.txt"
+    [[ -f "${manifest}" ]] || return 0
+    sed -e 's/#.*//' -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' "${manifest}" \
+        | grep -v '^$'
+}
+
+
+is-released() {
+    released-items | grep -qx -- "${1}"
+}
+
+
 list-assignments() {
     local out
-    out="$(ls "${CS351_COURSE}/src/" 2>/dev/null || true)"
+    out="$(released-items)"
     if [[ -z "${out}" ]]; then
-        echo "(none -- could not read ${CS351_COURSE}/src/)"
+        echo "(nothing released yet -- ask your instructor if you expected something)"
     else
         echo "${out}"
     fi

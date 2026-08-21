@@ -29,13 +29,24 @@ def init_repo(path):
 
 @pytest.fixture
 def course(tmp_path):
+    """A course repo with a1 released and a2 present but NOT released."""
     c = init_repo(tmp_path / "course")
     src = c / "src" / "a1"
     src.mkdir(parents=True)
     (src / "grammar").write_text("token ID '\\w+'\n")
     (src / "README.md").write_text("assignment 1\n")
+
+    unreleased = c / "src" / "a2"
+    unreleased.mkdir(parents=True)
+    (unreleased / "grammar").write_text("token ID 'draft'\n")
+
+    (c / "released.txt").write_text(
+        "# comment line\n"
+        "\n"
+        "a1\n"
+    )
     git(c, "add", "-A")
-    git(c, "commit", "-q", "-m", "add a1")
+    git(c, "commit", "-q", "-m", "add a1, draft a2, release a1")
     return c
 
 
@@ -230,3 +241,30 @@ def test_save_does_not_push_conflict_markers_on_retry(student, tmp_path):
     assert "attempt2" not in remote_log_after_second
 
     assert "<<<<<<<" in (student / "shared.txt").read_text()
+
+
+def test_begin_refuses_an_unreleased_assignment(student, course):
+    """a2 exists in src/ but is not in released.txt.
+
+    An unreleased assignment may still change before it is assigned. Because
+    begin copies files rather than tracking them, a student who started early
+    would be working against a moving target with no way to be notified.
+    """
+    r = run_begin(student, course, "a2")
+    assert r.returncode != 0
+    assert "has not been released yet" in r.stderr
+    assert not (student / "a2").exists()
+    assert not (student / ".cs351" / "pristine" / "a2").exists()
+
+
+def test_begin_lists_only_released_assignments(student, course):
+    r = run_begin(student, course)
+    assert "a1" in r.stderr
+    assert "a2" not in r.stderr
+
+
+def test_released_manifest_ignores_comments_and_blank_lines(student, course):
+    """The fixture's released.txt carries a comment and a blank line."""
+    r = run_begin(student, course, "a1")
+    assert r.returncode == 0, r.stderr
+    assert (student / "a1" / "grammar").exists()
