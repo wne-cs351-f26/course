@@ -1,4 +1,4 @@
-# Q6 - Parentheses balancing
+# Q7 - Parentheses balancing
 
 # Lexical specification
 skip WS '\s+'
@@ -10,4 +10,4 @@ token RP '\)'
 #
 # Here is a sketch of the first rule. Replace ... with something and
 # add more rules below it.
-<balanced> ::= ... AT
+<Balanced> ::= ... AT

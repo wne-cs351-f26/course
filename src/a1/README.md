@@ -4,11 +4,11 @@
 
 `a1/q1` contains the following starter files.
 
-- `grammar` - An empty file which you will modify.
+- `spec.plcc` - An empty file which you will modify.
 - `input` - Sample input for the scanner. (Do not modify)
 - `expected` - Expected output when scanner is given `input`. (Do not modify)
 
-In `grammar`, write a lexical specification acceptable to PLCC that skips over whitespace and skips all characters from a '#' character to the end of the line.  The lexical specification should accept the following strings as specific tokens:
+In `spec.plcc`, write a lexical specification acceptable to PLCC that skips over whitespace and skips all characters from a '#' character to the end of the line.  The lexical specification should accept the following strings as specific tokens:
 
 ```
 this
@@ -34,46 +34,44 @@ thisthat the end99 12345xxx _!
 `expected` contains the expected output when the scanner is ran on `input`.
 
 ```
-   2: THIS 'this'
-   2: THAT 'that'
-   3: ID 'otherwise'
-   3: THE 'the'
-   3: THING 'thing'
-   4: THAT 'that'
-   4: ID 'is'
-   4: ID 'another'
-   4: THING 'thing'
-   5: OTHER 'other'
-   6: ID 'thisthat'
-   6: THE 'the'
-   6: ID 'end99'
-   6: ID '12345xxx'
-   6: ID '_'
-   6: !ERROR("!")
+-:2:1 THIS 'this'
+-:2:6 THAT 'that'
+-:3:1 ID 'otherwise'
+-:3:11 THE 'the'
+-:3:15 THING 'thing'
+-:4:1 THAT 'that'
+-:4:6 ID 'is'
+-:4:9 ID 'another'
+-:4:17 THING 'thing'
+-:5:1 OTHER 'other'
+-:6:1 ID 'thisthat'
+-:6:10 THE 'the'
+-:6:14 ID 'end99'
+-:6:20 ID '12345xxx'
+-:6:29 ID '_'
+-:6:30: error: unrecognized character '!'
 ```
 
 > **DEVELOPMENT LOOP**
 >
 > To set up, position your terminal in the directory that
-> contains the grammar file you want to work on.
+> contains the `spec.plcc` file you want to work on.
 > Then do the following:
 >
-> 1. Compile the grammar
+> 1. Run the scanner and compare its output with `expected`.
 >     ```bash
->     plccmk -c grammar
+>     plcc-scan < input | diff - expected
 >     ```
+>     No output from `diff` means they match. There is no separate compile
+>     step: PLCC-ng builds the scanner for you and rebuilds it whenever
+>     `spec.plcc` changes.
 >
-> 2. Test using input from a file and compare this output with that in expected.
->     ```
->     scan < input-file
->     ```
->
-> 3. Modify grammar, and repeat.
+> 2. Modify `spec.plcc`, and repeat.
 
 
 ## QUESTION 2
 
-In `q2/grammar" write a lexical specification for PLCCs lexical specification.
+In `q2/spec.plcc`, write a lexical specification for PLCC's lexical specification.
 We are getting "meta" here. We want a scanner that can identify the tokens
 for PLCC's lexical specification language. For example.
 
@@ -82,6 +80,14 @@ token HI 'hi'
 skip BYE 'bye'
 # comments too
 ```
+
+> **Tip:** a PLCC pattern is normally delimited by single quotes, which makes
+> matching a *literal* single quote awkward. You may delimit a pattern with
+> double quotes instead, which is the easy way to match a quoted regex:
+>
+> ```
+> token REGEX "'[^']*'"
+> ```
 
 
 ## QUESTION 3
@@ -165,7 +171,7 @@ Replace this line with your answer.
 
 ## QUESTION 7
 
-In `q7/grammar`, define a grammar that generates a parser that accepts strings that only contain a balanced set of parentheses, and end in an at-sign.
+In `q7/spec.plcc`, define a grammar that generates a parser that accepts strings that only contain a balanced set of parentheses, and end in an at-sign.
 
 For example, the following are legal sentences in the proposed language.
 
@@ -185,59 +191,76 @@ The following are illegal sentences in the proposed language.
 ()
 ```
 
-`q7/grammar` contains a partial implementation of the language. So far, it contains a complete lexical specification. Your job is to complete the syntactic specification.
+`q7/spec.plcc` contains a partial implementation of the language. So far, it contains a complete lexical specification. Your job is to complete the syntactic specification.
 
 Your first rule should begin...
 
 ```
-<balanced> ::=
+<Balanced> ::=
 ```
 
-The legal and illegal input files have been provided for your convenience in `a1/q7/input/`.
+The legal and illegal input files have been provided for your convenience in `a1/q7/inputs/`.
 
 > **Development Cycle**
 >
 > Same as in q1, but this time you need to test the parser.
 >
+> `plcc-parse` reports success or failure through its **exit status**: 0 when
+> the input parses, non-zero when it does not. Do not judge by what is printed
+> -- `plcc-parse` streams the parse tree as it goes, so a failing input still
+> prints part of a tree before it reports the error.
+>
 > ```bash
-> # Test all the illegal strings and make sure they fail.
-> parse < input/illegal-01
-> parse < input/illegal-02
-> ...
-> # Test all the legal strings and make sure they pass.
-> parse < input/legal-01
-> ...
+> # Each of these should print PASS.
+> plcc-parse < inputs/legal-01 > /dev/null && echo PASS || echo FAIL
+>
+> # Each of these should print FAIL.
+> plcc-parse < inputs/illegal-01 > /dev/null && echo PASS || echo FAIL
 > ```
 >
-> If you get tired of repeating these tests over and over again. Consider writing a script to do it for you.
+> If you get tired of repeating these tests over and over again, consider writing a script to do it for you.
 
 * Constraint: ***Do not*** use the repeating rule (`**=`).
 * Tip: You should be able to define your grammar in just three BNF lines using two non-terminals.
 * Tip: Do use recursion.
-* Tip: You may need to provide PLCC with class names and/or instance variable names to avoid collisions.
-* Tip: Consider looking at tmp/languages/src/LON/grammar for some ideas.
+* Tip: You may need to provide PLCC with class names and/or field names to
+  avoid collisions. Two captured symbols with the same name on one right-hand
+  side is an error; write `<Nonterm:name>` to give one an explicit name.
+* Tip: Recursion with an empty alternative is the shape you are looking for.
+  Here is that idea applied to a *different* language -- a parenthesised list
+  of numbers:
+
+    ```
+    <Lon>            ::= LPAREN <Nums> RPAREN
+    <Nums:NumsNode>  ::= <NUM> <Nums>
+    <Nums:NumsNull>  ::=
+    ```
 
 ## QUESTION 8
 
-Going meta again... In `q8/grammar`, build a grammar for PLCC's lexical specification.
+Going meta again... In `q8/spec.plcc`, build a grammar for PLCC's lexical specification.
 Please ensure that your grammar embodies the following structure.
 
 * Each line is either a comment or a rule.
 * Each rule is either a skip rule or a token rule.
 * The keyword "token" in a token rule is optional.
 
-You can use the input for q2 to test your grammar. It should say OK when you
-parse it.
+You can use the input for q2 to test your grammar. `plcc-parse` should exit 0
+on it:
 
-You can try other grammars from other languages tmp/language/src/ . Copy their
-grammar into a file like input2, then delete everything after the lexical
-specification, and then see if your parser can parse it.
+```bash
+plcc-parse < ../q2/input > /dev/null && echo PASS || echo FAIL
+```
+
+To try it on more input, copy the lexical section of any PLCC specification
+into a file like `input2` -- delete everything from the first `%` onward --
+and see whether your parser accepts it.
 
 
 ## Question 9
 
-This builds on question 8. Copy your `q8/grammar` to `q9/grammar`.
-Add a semantic specification to `q9/grammar` that
+This builds on question 8. Copy your `q8/spec.plcc` to `q9/spec.plcc`.
+Add a semantic specification to `q9/spec.plcc` that
 creates a pretty-printer for a lexical specification.
 Your pretty-printer
 will reproduce the original input without comments, and with any `token`
@@ -261,5 +284,30 @@ token HI 'hi'
 token BYE 'bye'
 ```
 
-Reminder: for polymorphism to work, the base-class must have at least
-an abstract method as a placeholder.
+We write semantics in **Python**. The semantic section comes after the second
+`%`, and its first non-blank line names the language:
+
+```
+%
+Python
+YourStartSymbol
+%%%
+def _run(self):
+    ...
+%%%
+```
+
+Two rules to keep in mind:
+
+* `_run` must **return** the output as a string. PLCC-ng prints it for you --
+  do not print from inside `_run`.
+* For polymorphism to work, every alternative you dispatch on needs its own
+  version of the method you are calling. Python needs no abstract placeholder
+  on the base class, but it will fail at run time if an alternative is missing
+  the method.
+
+Run your pretty-printer with `plcc-rep`:
+
+```bash
+plcc-rep < input | diff - expected
+```
