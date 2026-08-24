@@ -1,11 +1,236 @@
 # CS351 - Assignment A2
 
-## Q1
+## QUESTION 1
+
+Consider the following grammar rule in a PLCC file:
+
+```
+<blah>:Goo ::= THIS <VAR> IS <silly>
+```
+
+What (non-abstract) Java class does this grammar rule define, and what are its
+instance variables (a.k.a. fields) and types?  Write your answer in the form of
+a Java signature for the constructor for the class:
+
+```
+XXX(AAA aaa, BBB bbb, ...)
+```
+
+Here XXX is the class name, and the instance variables are aaa of type AAA, bbb
+of type BBB, and so forth.
+
+### ANSWER
+
+```
+Replace this line with your answer.
+```
+
+
+## QUESTION 2
+
+Repeat the question above, except use the following grammar rule:
+
+```
+<many> **= THIS <rule> HAS MULTIPLE OCCURRENCES <OF> <stuff>
+```
+
+### ANSWER
+
+```
+Replace this line with your answer.
+```
+
+
+## QUESTION 3
+
+Repeat the question above, except use the following grammar rule:
+
+```
+<classes> ::= I AM TAKING <CSIT>c1 <CSIT>c2 AND <CSIT>c3
+```
+
+### ANSWER
+
+```
+Replace this line with your answer.
+```
+
+
+## QUESTION 4
+
+Consider what is wrong with the following grammar rule in a PLCC file.  You can
+assume that this is part of a larger PLCC grammar file in which other token
+specifications and grammar rules may appear.  Your answer should be a grammar
+rule that fixes all of the obvious errors on this line and that will be
+acceptable to PLCC. Your answer should keep the essential nature of the
+original grammar rule.
+
+Do *not* add or remove any of the '<' or '>' characters. Do *not* try to
+explain your answer -- just give the corrected grammar rule.
+
+```
+<VAR> := token <foo>
+```
+
+### ANSWER
+
+```
+Replace this line with your answer.
+```
+
+
+## QUESTION 5
+
+In `q5/spec.plcc`, define a grammar that generates a parser that accepts strings that only contain a balanced set of parentheses, and end in an at-sign.
+
+For example, the following are legal sentences in the proposed language.
+
+```
+@
+()@
+()(()(()))@
+```
+
+The following are illegal sentences in the proposed language.
+
+```
+())@
+(@
+)(@
+(()@
+()
+```
+
+`q5/spec.plcc` contains a partial implementation of the language. So far, it contains a complete lexical specification. Your job is to complete the syntactic specification.
+
+Your first rule should begin...
+
+```
+<Balanced> ::=
+```
+
+The legal and illegal input files have been provided for your convenience in `a2/q5/inputs/`.
+
+> **Development Cycle**
+>
+> Same shape as the scanner loop in A1, but this time you need to test the
+> parser.
+>
+> `plcc-parse` reports success or failure through its **exit status**: 0 when
+> the input parses, non-zero when it does not. Do not judge by what is printed
+> -- `plcc-parse` streams the parse tree as it goes, so a failing input still
+> prints part of a tree before it reports the error.
+>
+> ```bash
+> # Each of these should print PASS.
+> plcc-parse < inputs/legal-01 > /dev/null && echo PASS || echo FAIL
+>
+> # Each of these should print FAIL.
+> plcc-parse < inputs/illegal-01 > /dev/null && echo PASS || echo FAIL
+> ```
+>
+> If you get tired of repeating these tests over and over again, consider writing a script to do it for you.
+
+* Constraint: ***Do not*** use the repeating rule (`**=`).
+* Tip: You should be able to define your grammar in just three BNF lines using two non-terminals.
+* Tip: Do use recursion.
+* Tip: You may need to provide PLCC with class names and/or field names to
+  avoid collisions. Two captured symbols with the same name on one right-hand
+  side is an error; write `<Nonterm:name>` to give one an explicit name.
+* Tip: Recursion with an empty alternative is the shape you are looking for.
+  Here is that idea applied to a *different* language -- a parenthesised list
+  of numbers:
+
+    ```
+    <Lon>            ::= LPAREN <Nums> RPAREN
+    <Nums:NumsNode>  ::= <NUM> <Nums>
+    <Nums:NumsNull>  ::=
+    ```
+
+## QUESTION 6
+
+Going meta... In `q6/spec.plcc`, build a grammar for PLCC's lexical specification.
+This is the syntactic counterpart to the scanner you wrote in A1.
+Please ensure that your grammar embodies the following structure.
+
+* Each line is either a comment or a rule.
+* Each rule is either a skip rule or a token rule.
+* The keyword "token" in a token rule is optional.
+
+`q6/input` holds a small lexical specification to test your grammar against.
+`plcc-parse` should exit 0 on it:
+
+```bash
+plcc-parse < input > /dev/null && echo PASS || echo FAIL
+```
+
+To try it on more input, copy the lexical section of any PLCC specification
+into a file like `input2` -- delete everything from the first `%` onward --
+and see whether your parser accepts it.
+
+
+## QUESTION 7
+
+This builds on question 6. Copy your `q6/spec.plcc` to `q7/spec.plcc`.
+Add a semantic specification to `q7/spec.plcc` that
+creates a pretty-printer for a lexical specification.
+Your pretty-printer
+will reproduce the original input without comments, and with any `token`
+keywords that were not present. For example, if the input was
+
+```
+skip WS '\s+'
+# I have too much to do, so I'm not going to use the token keyword.
+HI 'hi'
+# OK, I have time to type this one.
+token BYE 'bye'
+```
+
+
+When you run this through your interpreter (pretty-printer), it would
+produce.
+
+```
+skip WS '\s+'
+token HI 'hi'
+token BYE 'bye'
+```
+
+We write semantics in **Python**. The semantic section comes after the second
+`%`, and its first non-blank line names the language:
+
+```
+%
+Python
+YourStartSymbol
+%%%
+def _run(self):
+    ...
+%%%
+```
+
+Two rules to keep in mind:
+
+* `_run` must **return** the output as a string. PLCC-ng prints it for you --
+  do not print from inside `_run`.
+* For polymorphism to work, every alternative you dispatch on needs its own
+  version of the method you are calling. Python needs no abstract placeholder
+  on the base class, but it will fail at run time if an alternative is missing
+  the method.
+
+Run your pretty-printer with `plcc-rep`:
+
+```bash
+plcc-rep < input | diff - expected
+```
+
+
+## QUESTION 8 (LONN)
 
 Starter files
 
 ```
-q1/lonn.grammar
+q8/lonn.grammar
 ```
 
 LONN is a language for a nonempty-list-of-numbers. Implement the
@@ -33,9 +258,9 @@ semantics implementation will use functional recursion to traverse this
 structure and compute a value.
 
 
-## QUESTION 2 (BINARY)
+## QUESTION 9 (BINARY)
 
-In `Q2/binary.grammar`, write a lexical specification and semantics for
+In `q9/binary.grammar`, write a lexical specification and semantics for
 unsigned binary numbers. The meaning of this language is decimal value
 of the given binary number. Here is an example `rep` session.
 
