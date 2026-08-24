@@ -18,6 +18,17 @@ instructor can see it.
 - `save [message]` — commit and push your work. **Your work is not
   submitted until you run this.**
 
+## How your work is graded
+
+Every assignment is graded on the same three criteria — Submission,
+Completeness, and Correctness — for nine points total. It is worth reading
+once, early:
+<https://github.com/wne-cs351-f26/course/blob/main/GRADING.md>
+
+The short version: attempting everything and submitting it properly is the
+baseline. Understanding is what moves the grade up. Comments on your work are
+advice, not deductions — read them.
+
 ## If something goes wrong
 
 Ask in Discord or in office hours. If `begin` reports that your repository
