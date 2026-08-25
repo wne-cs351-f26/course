@@ -3,34 +3,37 @@
 This is your personal, private repository for CS351. Only you and the
 instructor can see it.
 
-## Getting started
+## Start here
 
-1. Click **Code -> Codespaces -> Create codespace on main**.
-2. Wait for the environment to build. The first time takes a few minutes.
+1. Click **Code → Codespaces → Create codespace on main**.
+2. Wait for the environment to build. The first time takes several minutes.
 3. When it finishes, you will see `CS351 environment ready.`
 
-## Commands
+## The loop
 
-- `begin <assignment>` — copy an assignment's starter files into this
-  repository. Run `begin` with no arguments to list what is available.
-  Assignments appear here as they are released; if one you expect is
-  missing, it has not been released yet.
-- `save [message]` — commit and push your work. **Your work is not
-  submitted until you run this.**
+Every assignment works the same way:
 
-## How your work is graded
+```bash
+begin a1     # get the assignment
+             # ... do the work ...
+save         # hand it in
+```
 
-Every assignment is graded on the same three criteria — Submission,
-Completeness, and Correctness — for nine points total. It is worth reading
-once, early:
-<https://github.com/wne-cs351-f26/course/blob/main/GRADING.md>
+**Your work is not submitted until `save` has run.** Run it often — it is safe
+to run as many times as you like, and it is what keeps your work from living
+only inside a temporary container.
 
-The short version: attempting everything and submitting it properly is the
-baseline. Understanding is what moves the grade up. Comments on your work are
-advice, not deductions — read them.
+## Read these two, early
+
+- **[How to Work on CS351](https://github.com/wne-cs351-f26/course/blob/main/WORKFLOW.md)**
+  — codespaces, `begin`, `save`, keeping your work between sessions, and what
+  to do when something breaks. Short, and it answers most questions.
+- **[How Homework Is Graded](https://github.com/wne-cs351-f26/course/blob/main/GRADING.md)**
+  — the same three criteria for every assignment. Comments on your work are
+  advice, not deductions.
 
 ## If something goes wrong
 
-Ask in Discord or in office hours. If `begin` reports that your repository
-has an unfinished merge, do not try to fix it yourself — show your
+Ask in Discord or in office hours. If `begin` or `save` reports that your
+repository has an unfinished merge, do not try to fix it yourself — show your
 instructor.

@@ -6,8 +6,12 @@ Public. Holds assignment starter code and the student CLI.
   into a student's repository.
 - `bin/` — the `begin` and `save` commands.
 - `template/` — the skeleton seeded into each student repository.
-- `GRADING.md` — student-facing; how every assignment is scored. One URL
-  that works for both Kodiak shells.
+- `WORKFLOW.md` — student-facing; codespaces, `begin`, `save`, and keeping
+  work between sessions. Lives here rather than in `template/` because the
+  template is copied once at repository creation and never updates again,
+  while this is pulled on every `begin`.
+- `GRADING.md` — student-facing; how every assignment is scored. Same
+  reasoning, plus one URL that works for both Kodiak shells.
 
 **No solutions here.** Solutions live in the instructor's private
 repository. Anything committed here is world-readable.

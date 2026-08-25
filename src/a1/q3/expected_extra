@@ -1,0 +1,6 @@
+input_extra:1:1 NUM '42'
+input_extra:1:4 ID 'end99'
+input_extra:1:10 ID '12345xxx'
+input_extra:2:1 THIS 'this'
+input_extra:2:6 NUM '7'
+input_extra:2:8 THAT 'that'
