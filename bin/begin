@@ -19,18 +19,21 @@ source "$(dirname "${_self}")/.cs351-lib.bash"
 
 
 main() {
-    if [[ $# -lt 1 ]]; then
-        display-usage
-        return 0
-    fi
-
     FORCE=False
-    if [[ "${1}" == "-f" ]]; then
+    if [[ "${1:-}" == "-f" ]]; then
         FORCE=True
         shift
     fi
 
+    # Listing refreshes too. It is read-only, so it does not need a usable
+    # repository -- but it does need current course materials. Without this it
+    # reports whatever released.txt happened to be on disk from the last run,
+    # which hides a newly released assignment from exactly the student who ran
+    # `begin` to find out what is available. released.txt promises that adding
+    # a line and pushing takes effect on the next run with no action from
+    # students; that promise has to hold on this path as well.
     if [[ $# -lt 1 ]]; then
+        update-course
         display-usage
         return 0
     fi

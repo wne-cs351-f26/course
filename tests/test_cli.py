@@ -268,3 +268,45 @@ def test_released_manifest_ignores_comments_and_blank_lines(student, course):
     r = run_begin(student, course, "a1")
     assert r.returncode == 0, r.stderr
     assert (student / "a1" / "grammar").exists()
+
+
+@pytest.fixture
+def course_with_upstream(tmp_path):
+    """A course repo cloned from an upstream, so that pulling does something.
+
+    The `course` fixture has no remote, which is fine for everything that only
+    reads what is already on disk -- but it cannot show whether begin refreshes.
+    """
+    upstream = init_repo(tmp_path / "upstream")
+    src = upstream / "src" / "a1"
+    src.mkdir(parents=True)
+    (src / "README.md").write_text("assignment 1\n")
+    (upstream / "released.txt").write_text("# nothing released yet\n")
+    git(upstream, "add", "-A")
+    git(upstream, "commit", "-q", "-m", "a1 present, nothing released")
+
+    clone = tmp_path / "course"
+    subprocess.run(["git", "clone", "-q", str(upstream), str(clone)], check=True)
+    return upstream, clone
+
+
+def test_begin_listing_refreshes_course_materials(student, course_with_upstream):
+    """Releasing an assignment must reach a student who only runs `begin`.
+
+    released.txt promises that adding a line and pushing takes effect the next
+    time any student runs begin, with no action needed from students. That has
+    to hold on the listing path too: a student runs `begin` with no arguments
+    to find out what is available, so a stale clone there makes a freshly
+    released assignment invisible to the person looking for it.
+    """
+    upstream, course = course_with_upstream
+
+    r = run_begin(student, course)
+    assert "a1" not in r.stderr
+
+    (upstream / "released.txt").write_text("a1\n")
+    git(upstream, "add", "-A")
+    git(upstream, "commit", "-q", "-m", "release a1")
+
+    r = run_begin(student, course)
+    assert "a1" in r.stderr
