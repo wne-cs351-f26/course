@@ -26,6 +26,12 @@ quickly — which is the whole point of the turnaround schedule in the syllabus.
 Codespaces is not submitting. If you are unsure, run `save` again; it is safe
 to run as many times as you like.
 
+**Arriving on time is part of this criterion.** Submitting inside the 72-hour
+grace period *is* on time — it changes nothing and costs you nothing. Past the
+grace period, this criterion drops to **2 at best**, because being late is
+itself an impediment to grading. See [Late work](#late-work) below for what
+else changes.
+
 ### Completeness — was every problem attempted?
 
 | | |

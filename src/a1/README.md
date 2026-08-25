@@ -130,11 +130,14 @@ end.
 
 ## QUESTION 1 — How this course works
 
-Read [GRADING.md](https://github.com/wne-cs351-f26/course/blob/main/GRADING.md).
+Read [GRADING.md](../GRADING.md) — it is in your repository, one level up
+from this file. `begin` refreshes it every time it runs, so that copy is always
+the current one. You will want it again.
 Then answer both parts. One or two sentences each.
 
 **(a)** A student attempts every problem. Their work is complete and correct.
-They run `save` four days after the due date. What is the best score they can
+They run `save` [for the first time since they started the work] four days
+after the due date. What is the best score they can
 earn out of 9, and which single criterion costs them the most?
 
 ### ANSWER
