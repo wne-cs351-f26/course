@@ -12,7 +12,5 @@
 # BEGIN_BRANCH to that branch in your rehearsal repository. Students on `main`
 # are unaffected.
 
-# Nothing is released yet. a1's starter files are still PLCC v8 syntax
-# (files named `grammar`, not `spec.plcc`) while the devcontainer ships
-# plcc-ng, so releasing it now would hand students code the toolchain
-# cannot build. Release a1 once its migration lands.
+# Fall 2026
+a1
