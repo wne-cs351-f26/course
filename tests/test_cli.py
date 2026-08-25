@@ -5,6 +5,7 @@ repository, then runs the real scripts against them via subprocess.
 """
 
 import os
+import shutil
 import subprocess
 import pytest
 
@@ -310,3 +311,48 @@ def test_begin_listing_refreshes_course_materials(student, course_with_upstream)
 
     r = run_begin(student, course)
     assert "a1" in r.stderr
+
+
+def test_begin_force_replaces_rather_than_merges(student, course):
+    """A restructured assignment must not leave the old version's files behind.
+
+    `cp -R` into an existing directory merges. When a1 was rebuilt from six
+    questions to three, a student who ran `begin -f` kept the old question
+    directories alongside the new ones, while .cs351/pristine held only the new
+    files -- so the working copy and the baseline disagreed about what the
+    assignment was.
+    """
+    stale = course / "src" / "a1" / "q_old"
+    stale.mkdir()
+    (stale / "starter").write_text("old\n")
+    git(course, "add", "-A")
+    git(course, "commit", "-q", "-m", "a1 with q_old")
+
+    r = run_begin(student, course, "a1")
+    assert r.returncode == 0, r.stderr
+    assert (student / "a1" / "q_old" / "starter").exists()
+
+    shutil.rmtree(stale)
+    git(course, "add", "-A")
+    git(course, "commit", "-q", "-m", "restructure a1: drop q_old")
+
+    r = run_begin(student, course, "-f", "a1")
+    assert r.returncode == 0, r.stderr
+    assert not (student / "a1" / "q_old").exists()
+    assert (student / "a1" / "README.md").exists()
+    assert not (student / ".cs351" / "pristine" / "a1" / "q_old").exists()
+
+
+def test_begin_force_is_quiet_when_nothing_changed(student, course):
+    """Re-running begin -f with nothing changed is ordinary, not a failure.
+
+    `git commit` exits non-zero when nothing is staged and prints "nothing to
+    commit" to stdout, not stderr -- so the student saw raw git output followed
+    by a NOTE saying the commit failed, when everything was already in place.
+    """
+    run_begin(student, course, "a1")
+    r = run_begin(student, course, "-f", "a1")
+    assert r.returncode == 0, r.stderr
+    assert "Could not commit" not in r.stderr
+    assert "nothing to commit" not in r.stdout
+    assert "nothing to commit" not in r.stderr

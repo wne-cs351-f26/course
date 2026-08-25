@@ -71,10 +71,18 @@ main() {
     if [[ -e "${dest}" && "${FORCE}" != "True" ]]; then
         >&2 echo "ERROR: ${ASSIGNMENT} already exists in your repository."
         >&2 echo "Use 'begin -f ${ASSIGNMENT}' to overwrite it."
-        >&2 echo "WARNING: -f discards your changes to those files."
+        >&2 echo "WARNING: -f replaces the whole ${ASSIGNMENT}/ directory,"
+        >&2 echo "discarding everything in it."
         return 1
     fi
 
+    # Replace rather than merge. `cp -R` into an existing directory leaves the
+    # previous version's files behind: when a1 was rebuilt from six questions
+    # to three, `begin -f` kept q1, q2, q7, q8 and q9 next to the new q3, while
+    # record-pristine below (which does rm -rf) correctly held only the new
+    # files -- so the working copy and the baseline disagreed about what the
+    # assignment even was.
+    rm -rf "${dest}"
     cp -R "${source}" "${CS351_REPO_ROOT}/"
     record-pristine "${ASSIGNMENT}"
     commit-pristine "${ASSIGNMENT}" || warn-commit-failed "${ASSIGNMENT}"
@@ -137,11 +145,24 @@ record-pristine() {
 
 commit-pristine() {
     local assignment="${1}"
-    git -C "${CS351_REPO_ROOT}" add \
-        "${assignment}" ".cs351/pristine/${assignment}" \
-        && git -C "${CS351_REPO_ROOT}" commit --quiet --only \
-            "${assignment}" ".cs351/pristine/${assignment}" \
-            -m "chore: begin ${assignment}"
+    local paths=("${assignment}" ".cs351/pristine/${assignment}")
+
+    git -C "${CS351_REPO_ROOT}" add "${paths[@]}" >/dev/null 2>&1 || return 1
+
+    # Re-running begin when nothing upstream changed stages nothing, and git
+    # commit exits non-zero for that. It is the ordinary case rather than a
+    # failure -- the files are in place and already committed -- so report
+    # success. Without this the student saw a NOTE claiming the commit failed.
+    if git -C "${CS351_REPO_ROOT}" diff --cached --quiet -- "${paths[@]}"; then
+        return 0
+    fi
+
+    # git prints "nothing to commit" and friends on stdout, not stderr, so it
+    # lands in the middle of our own messages. Suppress both streams here the
+    # way update-course does; warn-commit-failed carries the student-facing
+    # message if this genuinely fails.
+    git -C "${CS351_REPO_ROOT}" commit --quiet --only "${paths[@]}" \
+        -m "chore: begin ${assignment}" >/dev/null 2>&1
 }
 
 
@@ -158,7 +179,7 @@ begin [-f] ASSIGNMENT
     Copies the starter files for ASSIGNMENT into your repository.
 
     Refuses if ASSIGNMENT already exists, unless -f is given.
-    -f overwrites, discarding your changes to those files.
+    -f replaces the whole directory, discarding everything in it.
 
 Available assignments:
 
