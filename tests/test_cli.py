@@ -356,3 +356,52 @@ def test_begin_force_is_quiet_when_nothing_changed(student, course):
     assert "Could not commit" not in r.stderr
     assert "nothing to commit" not in r.stdout
     assert "nothing to commit" not in r.stderr
+
+
+def test_begin_installs_reference_docs(student, course):
+    """GRADING.md and WORKFLOW.md land in the student's own repository.
+
+    They live in the course repository rather than the template so that they
+    refresh: the template is copied once at repository creation and never
+    updates. Copying them on every begin keeps them next to the student's work
+    AND current, which is why a1's handout can link ../GRADING.md.
+    """
+    (course / "GRADING.md").write_text("v1 grading\n")
+    (course / "WORKFLOW.md").write_text("v1 workflow\n")
+    git(course, "add", "-A")
+    git(course, "commit", "-q", "-m", "add references")
+
+    r = run_begin(student, course, "a1")
+    assert r.returncode == 0, r.stderr
+    assert (student / "GRADING.md").read_text() == "v1 grading\n"
+    assert (student / "WORKFLOW.md").read_text() == "v1 workflow\n"
+
+    # committed, not left dangling for `save` to sweep up later
+    tracked = git(student, "ls-files").stdout.split()
+    assert "GRADING.md" in tracked
+    assert "WORKFLOW.md" in tracked
+
+
+def test_begin_refreshes_reference_docs(student, course):
+    """An updated reference reaches a student who has already begun work."""
+    (course / "GRADING.md").write_text("v1\n")
+    git(course, "add", "-A")
+    git(course, "commit", "-q", "-m", "references v1")
+    run_begin(student, course, "a1")
+    assert (student / "GRADING.md").read_text() == "v1\n"
+
+    (course / "GRADING.md").write_text("v2\n")
+    git(course, "add", "-A")
+    git(course, "commit", "-q", "-m", "references v2")
+
+    r = run_begin(student, course, "-f", "a1")
+    assert r.returncode == 0, r.stderr
+    assert (student / "GRADING.md").read_text() == "v2\n"
+
+
+def test_begin_works_without_reference_docs(student, course):
+    """A course repository lacking them must not break begin."""
+    r = run_begin(student, course, "a1")
+    assert r.returncode == 0, r.stderr
+    assert (student / "a1" / "README.md").exists()
+    assert not (student / "GRADING.md").exists()

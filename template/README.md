@@ -32,6 +32,10 @@ only inside a temporary container.
   — the same three criteria for every assignment. Comments on your work are
   advice, not deductions.
 
+Both are linked above on the web, so they work before your codespace exists.
+Once you have run `begin` for the first time, copies of both also appear in
+this repository, refreshed every time `begin` runs.
+
 ## If something goes wrong
 
 Ask in Discord or in office hours. If `begin` or `save` reports that your
