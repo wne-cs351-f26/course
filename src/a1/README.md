@@ -101,27 +101,76 @@ built something — which strings a pattern matches, a pattern that separates tw
 sets, what a scanner does with an ambiguous input. Not by having memorized the
 command names.
 
-## QUESTION 1
+## QUESTION 1 — How this course works
 
-`a1/q1` contains the following starter files.
+Read [GRADING.md](https://github.com/wne-cs351-f26/course/blob/main/GRADING.md).
+Then answer both parts. One or two sentences each.
 
-- `spec.plcc` - An empty file which you will modify.
-- `input` - Sample input for the scanner. (Do not modify)
-- `expected` - Expected output when scanner is given `input`. (Do not modify)
+**(a)** A student attempts every problem. Their work is complete and correct.
+They run `save` four days after the due date. What is the best score they can
+earn out of 9, and which single criterion costs them the most?
 
-In `spec.plcc`, write a lexical specification acceptable to PLCC that skips over whitespace and skips all characters from a '#' character to the end of the line.  The lexical specification should accept the following strings as specific tokens:
+### ANSWER
 
 ```
-this
-that
-the
-other
-thing
+Replace this line with your answer.
 ```
 
-All other strings consisting of letters, digits, and underscores should be returned as a single ID token.  You should use appropriate token class names for the other tokens. If you encounter anything that does not conform to these specifications, it's an error.
+**(b)** I leave a comment on your submission suggesting a cleaner way to write
+one of your regexes. How many points does that comment cost you?
 
-`input` contains the following input for the scanner (Scan):
+### ANSWER
+
+```
+Replace this line with your answer.
+```
+
+
+## QUESTION 2 — Where scanning sits
+
+Short answers. One or two sentences each.
+
+**(a)** In your own words, what is a language's *syntax*, and what is its
+*semantics*?
+
+### ANSWER
+
+```
+Replace this line with your answer.
+```
+
+**(b)** Lexical analysis is the first of three phases. What does it produce,
+and what consumes what it produces?
+
+### ANSWER
+
+```
+Replace this line with your answer.
+```
+
+**(c)** A token is an abstraction; a lexeme is an instance of it. Give one
+token that could have many different lexemes, and one token that has exactly
+one possible lexeme.
+
+### ANSWER
+
+```
+Replace this line with your answer.
+```
+
+
+## QUESTION 3 — Lab: build a scanner one rule at a time
+
+This is a guided lab. Work the steps **in order** and answer as you go — the
+later steps depend on what the earlier ones show you.
+
+`q3/` contains three files.
+
+- `spec.plcc` — empty. You will build it up over the course of this lab.
+- `input` — sample input. **Do not modify.**
+- `expected` — the output your finished scanner must produce. **Do not modify.**
+
+`input` contains:
 
 ```
 # example input
@@ -132,60 +181,230 @@ other#other#other#other
 thisthat the end99 12345xxx _!
 ```
 
-`expected` contains the expected output when the scanner is ran on `input`.
+Position your terminal in `q3/` before you start. There is no compile step:
+PLCC-ng rebuilds the scanner whenever `spec.plcc` changes.
 
-```
--:2:1 THIS 'this'
--:2:6 THAT 'that'
--:3:1 ID 'otherwise'
--:3:11 THE 'the'
--:3:15 THING 'thing'
--:4:1 THAT 'that'
--:4:6 ID 'is'
--:4:9 ID 'another'
--:4:17 THING 'thing'
--:5:1 OTHER 'other'
--:6:1 ID 'thisthat'
--:6:10 THE 'the'
--:6:14 ID 'end99'
--:6:20 ID '12345xxx'
--:6:29 ID '_'
--:6:30: error: unrecognized character '!'
+Where you are going: whitespace skipped, `#` to end of line skipped, the five
+words `this that the other thing` recognised as their own tokens, every other
+run of letters/digits/underscores an `ID`, and anything else an error.
+
+---
+
+### Step 1 — Run it before you write anything
+
+`spec.plcc` is empty. Run:
+
+```bash
+plcc-scan < input
 ```
 
-> **DEVELOPMENT LOOP**
->
-> To set up, position your terminal in the directory that
-> contains the `spec.plcc` file you want to work on.
-> Then do the following:
->
-> 1. Run the scanner and compare its output with `expected`.
->     ```bash
->     plcc-scan < input | diff - expected
->     ```
->     No output from `diff` means they match. There is no separate compile
->     step: PLCC-ng builds the scanner for you and rebuilds it whenever
->     `spec.plcc` changes.
->
-> 2. Modify `spec.plcc`, and repeat.
+**Report** the first three lines of output, and say in one sentence what an
+empty specification does to the input.
 
-
-## QUESTION 2
-
-In `q2/spec.plcc`, write a lexical specification for PLCC's lexical specification.
-We are getting "meta" here. We want a scanner that can identify the tokens
-for PLCC's lexical specification language. For example.
+#### ANSWER
 
 ```
-token HI 'hi'
-skip BYE 'bye'
-# comments too
+Replace this line with your answer.
 ```
 
-> **Tip:** a PLCC pattern is normally delimited by single quotes, which makes
-> matching a *literal* single quote awkward. You may delimit a pattern with
-> double quotes instead, which is the easy way to match a quoted regex:
->
-> ```
-> token REGEX "'[^']*'"
-> ```
+---
+
+### Step 2 — One rule
+
+Put a single line in `spec.plcc`:
+
+```
+token ID '\w+'
+```
+
+Run it again. Some things are now tokens; a lot of it is still errors.
+
+**Report** what is now recognised and what is not. Then answer: the spaces
+between words were never something you wanted, so **why are they errors
+rather than simply ignored?**
+
+#### ANSWER
+
+```
+Replace this line with your answer.
+```
+
+---
+
+### Step 3 — Throw something away on purpose
+
+Add a rule that skips whitespace. Run again.
+
+**Report** what changed, and what is still an error.
+
+#### ANSWER
+
+```
+Replace this line with your answer.
+```
+
+---
+
+### Step 4 — Comments
+
+Add a rule that skips from a `#` to the end of the line. Run again.
+
+You should now get through the whole file with no errors except one, at the
+very end. Every word should be coming out as an `ID`.
+
+**Report** your two `skip` rules. Then answer: line 5 of the input is
+`other#other#other#other` — how many tokens does it produce, and why?
+
+#### ANSWER
+
+```
+Replace this line with your answer.
+```
+
+---
+
+### Step 5 — Three ways to feed it
+
+`plcc-scan` takes its input three ways: as a file argument, interactively from
+the keyboard, and by redirection. Run your current specification all three
+ways.
+
+```bash
+plcc-scan input          # file argument
+plcc-scan                # interactive; type a line, then Ctrl-D
+plcc-scan < input        # redirection
+```
+
+**Answer:** two of the three agree and one differs, in the same place on every
+line. Which one differs, what is different, and why does that make sense?
+
+#### ANSWER
+
+```
+Replace this line with your answer.
+```
+
+---
+
+### Step 6 — Add the keywords in the wrong place first
+
+Add five `token` rules for `this`, `that`, `the`, `other`, and `thing`, using
+the token names `THIS`, `THAT`, `THE`, `OTHER`, and `THING`. Put all five
+**below** your `token ID` rule.
+
+**Predict before you run.** Write down what you expect the word `this` on line
+2 to come out as. Then run it.
+
+#### ANSWER — your prediction, then what actually happened
+
+```
+Replace this line with your answer.
+```
+
+---
+
+### Step 7 — Move them, and find out why it mattered
+
+Move the five keyword rules **above** the `token ID` rule. Run again. The
+keywords now come out as themselves.
+
+But look at line 3. The word `otherwise` is still an `ID` — it did not become
+`OTHER` followed by an `ID`. Two different things are going on, and this step
+is about telling them apart.
+
+Run the tracer and read the candidate table:
+
+```bash
+plcc-scan -t < input
+```
+
+**Answer both:**
+
+**(a)** For the word `this`, two rules match and both match four characters.
+Which rule wins, and what decides it?
+
+**(b)** For the word `otherwise`, two rules also match. Which wins, and what
+decides it *this* time? Would reordering your rules change this one?
+
+#### ANSWER
+
+```
+Replace this line with your answer.
+```
+
+---
+
+### Step 8 — The error at the end
+
+The input ends with `_!`.
+
+**Predict** what your scanner does with those two characters, then run it and
+check.
+
+**Answer:** why is `!` an error? Your specification is not broken — say what
+an error actually means here, and name one rule you could add that would make
+`!` stop being one.
+
+#### ANSWER
+
+```
+Replace this line with your answer.
+```
+
+---
+
+### Step 9 — Match the expected output
+
+Your scanner should now reproduce `expected` exactly, error line included.
+
+```bash
+plcc-scan < input | diff - expected
+```
+
+No output from `diff` means they match.
+
+**Report:** paste your finished `spec.plcc`. Leave it in `q3/spec.plcc` — this
+is the file that gets graded.
+
+#### ANSWER
+
+```
+Replace this line with your answer.
+```
+
+---
+
+### Step 10 — On your own
+
+Everything up to here told you what to do. This step does not.
+
+Copy your working specification to a second file so you do not disturb step 9:
+
+```bash
+cp spec.plcc extra.plcc
+```
+
+Add a rule to `extra.plcc` that recognises a run of digits as a token named
+`NUM`. Run it against the original input using the `-s` option, which points
+`plcc-scan` at a specification other than the default:
+
+```bash
+plcc-scan -s extra.plcc < input
+```
+
+**Answer all three:**
+
+**(a)** Compare the output to step 9's. What changed?
+
+**(b)** The input contains `end99` and `12345xxx`, both of which contain
+digits. Explain why your new rule did not do what you might have expected to
+either of them.
+
+**(c)** Write a line of input that makes `NUM` actually appear in the output,
+and show the output that proves it.
+
+#### ANSWER
+
+```
+Replace this line with your answer.
+```
