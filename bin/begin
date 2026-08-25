@@ -5,6 +5,22 @@
 # The baseline is a filesystem copy under .cs351/pristine/, not a git
 # commit, so that recording it does not depend on the repository being in
 # a clean state. The commit is best-effort on top of that.
+# Everything below is wrapped in a brace group so that bash parses the whole
+# file before executing any of it.
+#
+# bash reads a script incrementally, in blocks, and keeps its file offset.
+# `begin` pulls the course repository, and it lives *in* that repository --
+# so a pull can rewrite this very file mid-run. git rewrites in place rather
+# than replacing the inode (verified), so the running shell's descriptor
+# points at the new bytes and the next read resumes at an offset into
+# different content. The observed effect is a run that executes half the old
+# version and half the new one; with the offset landing mid-token it is a
+# syntax error instead.
+#
+# The brace group makes bash read to the closing brace before running
+# anything, so a rewrite mid-run cannot affect the invocation in flight.
+# Nothing is indented into it, to keep the diff honest.
+{
 set -euo pipefail
 
 BEGIN_BRANCH="${BEGIN_BRANCH:-main}"
@@ -217,3 +233,4 @@ list-assignments() {
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     main "$@"
 fi
+}

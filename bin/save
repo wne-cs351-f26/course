@@ -4,6 +4,11 @@
 # Every git invocation is pinned with -C to the student's repository. The
 # previous version left `pull` and `push` unpinned, so running save from
 # inside a nested clone acted on the wrong repository.
+# Wrapped in a brace group so bash parses the whole file before executing any
+# of it: a `begin` run pulls the course repository, which rewrites every file
+# in bin/ -- including this one -- and bash would otherwise resume reading at
+# an offset into the new content. See the longer note in `begin`.
+{
 set -euo pipefail
 
 CS351_REPO_ROOT="${CS351_REPO_ROOT:-$PWD}"
@@ -86,3 +91,4 @@ report-error() {
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     main "$@"
 fi
+}

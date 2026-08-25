@@ -13,6 +13,11 @@
 # would otherwise resolve to the symlink's directory, not this one.
 
 # True (exit 0) if REPO_ROOT looks like a git repository at all.
+# Wrapped in a brace group so bash parses the whole file before executing any
+# of it: a `begin` run pulls the course repository, which rewrites every file
+# in bin/ -- including this one -- and bash would otherwise resume reading at
+# an offset into the new content. See the longer note in `begin`.
+{
 cs351_is_git_repo() {
     git -C "${1}" rev-parse --git-dir >/dev/null 2>&1
 }
@@ -34,4 +39,5 @@ cs351_repo_has_unfinished_merge() {
         || [[ -d "${git_dir}/rebase-merge" ]] \
         || [[ -d "${git_dir}/rebase-apply" ]] \
         || [[ -n "$(git -C "${repo_root}" ls-files -u)" ]]
+}
 }
