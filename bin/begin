@@ -60,7 +60,6 @@ main() {
     assert-repo-usable
 
     update-course
-    sync-infrastructure
 
     local source="${CS351_COURSE}/src/${ASSIGNMENT}"
     if [[ ! -d "${source}" ]]; then
@@ -85,6 +84,9 @@ main() {
         return 1
     fi
 
+    # After the refusals above, which promise "Nothing has been changed."
+    sync-infrastructure
+
     local dest="${CS351_REPO_ROOT}/src/${ASSIGNMENT}"
     if [[ -e "${dest}" && "${FORCE}" != "True" ]]; then
         >&2 echo "ERROR: ${ASSIGNMENT} already exists in your repository."
@@ -106,7 +108,7 @@ main() {
     record-pristine "${ASSIGNMENT}"
     commit-pristine "${ASSIGNMENT}" || warn-commit-failed "${ASSIGNMENT}"
 
-    echo "Started ${ASSIGNMENT}. Edit the files in ${ASSIGNMENT}/, then run 'save'."
+    echo "Started ${ASSIGNMENT}. Edit the files in src/${ASSIGNMENT}/, then run 'save'."
 }
 
 
@@ -182,16 +184,42 @@ sync-infrastructure() {
         return 0
     fi
 
+    # ONE list drives both the copy and the staging, and src is not on it.
+    # That is what makes disjointness a property of this code rather than a rule
+    # to remember: copying the whole of infra/ in one `cp -R "${infra}/."` would
+    # MERGE a stray infra/src/ into the student's own src/, and `git add -- src`
+    # would then sweep their uncommitted work into a commit labelled as ours.
     local -a entries=()
     local entry
     while IFS= read -r entry; do
-        [[ -n "${entry}" ]] && entries+=("${entry}")
+        case "${entry}" in
+            '' | src | .git) continue ;;
+        esac
+        entries+=("${entry}")
     done < <(cd "${infra}" && find . -mindepth 1 -maxdepth 1 -printf '%P\n' | sort)
     [[ ${#entries[@]} -gt 0 ]] || return 0
 
-    cp -R "${infra}/." "${CS351_REPO_ROOT}/"
+    # cp is a bare command under `set -e`; an unwritable destination would kill
+    # begin outright, and the listing path in particular has to keep answering.
+    for entry in "${entries[@]}"; do
+        if ! cp -R "${infra}/${entry}" "${CS351_REPO_ROOT}/" 2>/dev/null; then
+            >&2 echo "NOTE: Course files could not be updated. Your own work is"
+            >&2 echo "untouched. Tell your instructor if this keeps happening."
+            return 0
+        fi
+    done
 
-    git -C "${CS351_REPO_ROOT}" add -- "${entries[@]}" >/dev/null 2>&1 || return 0
+    # Do not swallow a staging failure: that would leave files copied and
+    # partially staged with nothing said, which is the state committing here is
+    # meant to prevent -- save's `git add .` would later commit them as though
+    # they were the student's work.
+    if ! git -C "${CS351_REPO_ROOT}" add -- "${entries[@]}" >/dev/null 2>&1; then
+        >&2 echo "NOTE: Course files were updated but could not be staged."
+        >&2 echo "Your own work is untouched. Tell your instructor if this keeps"
+        >&2 echo "happening."
+        return 0
+    fi
+
     if git -C "${CS351_REPO_ROOT}" diff --cached --quiet -- "${entries[@]}"; then
         return 0
     fi

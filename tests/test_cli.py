@@ -460,13 +460,33 @@ def test_sync_soft_fails_on_an_unfinished_merge(student, course):
 
 
 def test_sync_never_writes_under_src(student, course):
-    """src/ belongs to the student. Sync must not touch it under any input."""
+    """src/ belongs to the student. Sync must not reach it even when a course
+    file is named so as to collide.
+
+    This is the property the whole layout exists to provide, so the test plants
+    the collision rather than assuming it cannot happen: an infra/src/ path is
+    a bug in the course repository, and it must not escape the root. Without
+    the filter, `cp` merges infra/src into the student's src/ and `git add`
+    sweeps their uncommitted work into a commit labelled as the course's.
+    """
     make_infra(course, {"GRADING.md": "v1\n"})
     run_begin(student, course, "a1")
-    (student / "src" / "a1" / "grammar").write_text("student work\n")
-    git(student, "add", "-A")
-    git(student, "commit", "-q", "-m", "work")
 
-    run_begin(student, course)
+    (student / "src" / "a1" / "grammar").write_text("student work\n")
+
+    # A bug in the course repository: infrastructure named like student space.
+    collision = course / "infra" / "src" / "a1"
+    collision.mkdir(parents=True)
+    (collision / "grammar").write_text("COURSE CLOBBER\n")
+    git(course, "add", "-A")
+    git(course, "commit", "-q", "-m", "infra with a colliding src/ path")
+
+    r = run_begin(student, course)
+    assert r.returncode == 0, r.stderr
+
+    # The student's work is untouched ...
     assert (student / "src" / "a1" / "grammar").read_text() == "student work\n"
-    assert not (student / "a1").exists()
+    # ... and was not swept into a course commit.
+    staged = git(student, "diff", "--cached", "--name-only").stdout
+    assert "src/a1/grammar" not in staged
+    assert "src/a1/grammar" in git(student, "status", "--porcelain").stdout
