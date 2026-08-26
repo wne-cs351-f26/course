@@ -38,10 +38,6 @@ Enter. You should see a list of the assignments available to you.
 If you get `command not found` instead, the setup did not finish. Say so in
 Discord rather than pressing on, because `begin` and `save` will not work.
 
-Do not go looking for a "setup finished" message in the terminal — the setup
-runs before your terminal exists, and its output goes to a build log you will
-never normally see. Running `begin` is the check.
-
 ### If VS Code offers to rebuild the container
 
 Sometimes, after `begin`, VS Code shows a bar saying the dev container
