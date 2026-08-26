@@ -159,6 +159,29 @@ usually fine. If the assignment then looks wrong or incomplete, say so.
 tooling is not the same as being stuck on the material, and it is not
 something to spend an evening on alone.
 
+## Which files are yours
+
+Your repository holds two kinds of file.
+
+**Your work lives under `src/`.** `begin a1` creates `src/a1/`, and everything
+in it is yours: the handout you write answers into, the files you edit, anything
+you add. Nothing the course does will ever overwrite it. The one exception is
+`begin -f`, which you have to ask for by name, and which tells you what it is
+about to discard.
+
+**Everything else belongs to the course** — `README.md`, `GRADING.md`, this
+file, `.gitignore`, and the `.devcontainer` and `.vscode` directories. Every
+time you run `begin`, those are refreshed from the course repository. If I fix a
+mistake in the grading document, you get the fix automatically. If you edit one
+of them, your edit is replaced the next time you run `begin`.
+
+Nothing is lost when that happens: `save` has already committed your work, so
+the old version stays in your repository's history.
+
+If your repository is in a state that cannot be written to safely — an
+unfinished merge, most likely — `begin` says so and skips the refresh rather
+than making things worse. Your own work is never touched by it.
+
 ## See also
 
 - [GRADING.md](GRADING.md) — how every assignment is scored.

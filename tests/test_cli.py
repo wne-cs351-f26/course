@@ -490,3 +490,31 @@ def test_sync_never_writes_under_src(student, course):
     staged = git(student, "diff", "--cached", "--name-only").stdout
     assert "src/a1/grammar" not in staged
     assert "src/a1/grammar" in git(student, "status", "--porcelain").stdout
+
+
+def test_a_solution_is_just_an_assignment(student, course):
+    """Solutions need no mechanism: src/a1-sol is an assignment like any other.
+
+    Nothing here is solution-specific. The test exists because the naming
+    convention puts a hyphen in an assignment name for the first time, and
+    is-released matches names with `grep -qx`.
+    """
+    sol = course / "src" / "a1-sol"
+    sol.mkdir(parents=True)
+    (sol / "answers.md") .write_text("the answers\n")
+    (course / "released.txt").write_text("a1\n")
+    git(course, "add", "-A")
+    git(course, "commit", "-q", "-m", "a1-sol present, not released")
+
+    r = run_begin(student, course, "a1-sol")
+    assert r.returncode != 0
+    assert "has not been released yet" in r.stderr
+    assert not (student / "src" / "a1-sol").exists()
+
+    (course / "released.txt").write_text("a1\na1-sol\n")
+    git(course, "add", "-A")
+    git(course, "commit", "-q", "-m", "release a1-sol")
+
+    r = run_begin(student, course, "a1-sol")
+    assert r.returncode == 0, r.stderr
+    assert (student / "src" / "a1-sol" / "answers.md").exists()

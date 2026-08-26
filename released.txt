@@ -8,6 +8,16 @@
 # To release something: add its line, commit, push. `begin` pulls on every run,
 # so it takes effect the next time any student runs it. No student action needed.
 #
+# Solutions ship as ordinary assignments: src/a1-sol, fetched with
+# `begin a1-sol`. They are authored in the instructor's private repository at
+# courses/cs351/solutions/ and copied here only when they are released.
+#
+# THIS REPOSITORY IS PUBLIC. Anything pushed to it is readable by anyone,
+# whether or not it appears below. This file controls what `begin` will fetch;
+# it is not an access control. For solutions the push IS the release -- do not
+# push src/a<N>-sol until you intend students to have it, and put the push and
+# the line below in the same commit.
+#
 # To rehearse something unreleased: add it to released.txt on a branch, then set
 # BEGIN_BRANCH to that branch in your rehearsal repository. Students on `main`
 # are unaffected.

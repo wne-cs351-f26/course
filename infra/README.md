@@ -34,6 +34,17 @@ only inside a temporary container.
 
 Both are already in this repository, refreshed every time `begin` runs.
 
+## What is yours, and what is not
+
+**Everything under `src/` is your work** — the assignments you fetch with
+`begin`, and anything you add inside them. Nothing outside `src/` is.
+
+Those other files come from the course, and they are refreshed every time you
+run `begin`. That is deliberate: it means a correction to the grading document
+or to these instructions reaches you without you doing anything. It also means
+**changes you make to them will be replaced**, so if you want to keep notes,
+keep them inside your assignment directory.
+
 ## If something goes wrong
 
 Ask in Discord or in office hours. If `begin` or `save` reports that your
