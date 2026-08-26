@@ -6,8 +6,13 @@ instructor can see it.
 ## Start here
 
 1. Click **Code → Codespaces → Create codespace on main**.
-2. Wait for the environment to build. The first time takes several minutes.
-3. When it finishes, you will see `CS351 environment ready.`
+2. VS Code asks **"Do you trust the authors of the files in this folder?"**
+   Click **Trust Folder & Continue**. This is your own repository.
+3. Wait for the environment to build. The first time takes about **three
+   minutes**. It only happens once.
+4. When the terminal is ready, type `begin` and press Enter. You should see a
+   list of the assignments available to you. If you get `command not found`,
+   the setup did not finish — say so in Discord rather than pressing on.
 
 ## The loop
 

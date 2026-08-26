@@ -23,16 +23,24 @@ this course needs. You do not install anything on your own machine.
 1. Open your CS351 repository on GitHub.
 2. Click the green **Code** button, choose the **Codespaces** tab, then
    **Create codespace on main**.
-3. Wait. The first build takes several minutes because it is downloading and
-   configuring the whole environment. This is normal and it only happens once.
-4. When it finishes you will see:
+3. VS Code asks **"Do you trust the authors of the files in this folder?"**
+   Click **Trust Folder & Continue**. It asks because opening a folder can run
+   code from it, which is a sensible thing to be careful about in general — but
+   this is your own private repository, set up by me, so it is safe. If you
+   click Cancel instead, the terminal will not start and nothing will work.
+4. Wait. The first build takes about **three minutes**, because it is
+   downloading and configuring the whole environment. This is normal and it
+   only happens once.
 
-   ```
-   CS351 environment ready. Run 'begin' to list assignments.
-   ```
+**How to tell it worked.** When the terminal is ready, type `begin` and press
+Enter. You should see a list of the assignments available to you.
 
-If you do not see that line, something went wrong with the setup — say so in
+If you get `command not found` instead, the setup did not finish. Say so in
 Discord rather than pressing on, because `begin` and `save` will not work.
+
+Do not go looking for a "setup finished" message in the terminal — the setup
+runs before your terminal exists, and its output goes to a build log you will
+never normally see. Running `begin` is the check.
 
 ### Coming back to it
 
