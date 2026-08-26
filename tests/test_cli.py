@@ -67,7 +67,7 @@ def run_begin(student, course, *args):
 def test_begin_copies_assignment_files(student, course):
     r = run_begin(student, course, "a1")
     assert r.returncode == 0, r.stderr
-    assert (student / "a1" / "grammar").exists()
+    assert (student / "src" / "a1" / "grammar").exists()
 
 
 def test_begin_records_pristine_copy(student, course):
@@ -82,7 +82,7 @@ def test_begin_commits_only_the_assignment(student, course):
     git(student, "add", "myfile.txt")
     run_begin(student, course, "a1")
     files = git(student, "show", "--name-only", "--format=", "HEAD").stdout.split()
-    assert "a1/grammar" in files
+    assert "src/a1/grammar" in files
     assert "myfile.txt" not in files
     staged = git(student, "diff", "--cached", "--name-only").stdout.split()
     assert "myfile.txt" in staged
@@ -103,10 +103,10 @@ def test_begin_refuses_existing_without_force(student, course):
 
 def test_begin_overwrites_with_force(student, course):
     run_begin(student, course, "a1")
-    (student / "a1" / "grammar").write_text("student edited\n")
+    (student / "src" / "a1" / "grammar").write_text("student edited\n")
     r = run_begin(student, course, "-f", "a1")
     assert r.returncode == 0, r.stderr
-    assert (student / "a1" / "grammar").read_text() == "token ID '\\w+'\n"
+    assert (student / "src" / "a1" / "grammar").read_text() == "token ID '\\w+'\n"
 
 
 def test_begin_refuses_conflicted_repo_before_copying(student, course):
@@ -125,7 +125,7 @@ def test_begin_refuses_conflicted_repo_before_copying(student, course):
     assert r.returncode != 0
     assert "unfinished merge" in r.stderr
     # Critical: it must refuse BEFORE copying, so nothing is half-applied.
-    assert not (student / "a1").exists()
+    assert not (student / "src" / "a1").exists()
 
 
 def test_begin_lists_assignments_with_no_arguments(student, course):
@@ -268,7 +268,7 @@ def test_released_manifest_ignores_comments_and_blank_lines(student, course):
     """The fixture's released.txt carries a comment and a blank line."""
     r = run_begin(student, course, "a1")
     assert r.returncode == 0, r.stderr
-    assert (student / "a1" / "grammar").exists()
+    assert (student / "src" / "a1" / "grammar").exists()
 
 
 @pytest.fixture
@@ -330,7 +330,7 @@ def test_begin_force_replaces_rather_than_merges(student, course):
 
     r = run_begin(student, course, "a1")
     assert r.returncode == 0, r.stderr
-    assert (student / "a1" / "q_old" / "starter").exists()
+    assert (student / "src" / "a1" / "q_old" / "starter").exists()
 
     shutil.rmtree(stale)
     git(course, "add", "-A")
@@ -338,8 +338,8 @@ def test_begin_force_replaces_rather_than_merges(student, course):
 
     r = run_begin(student, course, "-f", "a1")
     assert r.returncode == 0, r.stderr
-    assert not (student / "a1" / "q_old").exists()
-    assert (student / "a1" / "README.md").exists()
+    assert not (student / "src" / "a1" / "q_old").exists()
+    assert (student / "src" / "a1" / "README.md").exists()
     assert not (student / ".cs351" / "pristine" / "a1" / "q_old").exists()
 
 
@@ -403,5 +403,17 @@ def test_begin_works_without_reference_docs(student, course):
     """A course repository lacking them must not break begin."""
     r = run_begin(student, course, "a1")
     assert r.returncode == 0, r.stderr
-    assert (student / "a1" / "README.md").exists()
+    assert (student / "src" / "a1" / "README.md").exists()
     assert not (student / "GRADING.md").exists()
+
+
+def test_begin_puts_assignments_under_src(student, course):
+    """Student work lives under src/; nothing else in the repo does.
+
+    The two namespaces are disjoint so that infrastructure sync, which writes
+    only outside src/, cannot reach a student's work by accident.
+    """
+    r = run_begin(student, course, "a1")
+    assert r.returncode == 0, r.stderr
+    assert (student / "src" / "a1" / "grammar").exists()
+    assert not (student / "a1").exists()

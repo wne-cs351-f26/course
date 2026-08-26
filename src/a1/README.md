@@ -130,7 +130,7 @@ end.
 
 ## QUESTION 1 — How this course works
 
-Read [GRADING.md](../GRADING.md) — it is in your repository, one level up
+Read [GRADING.md](../../GRADING.md) — it is in your repository, two levels up
 from this file. `begin` refreshes it every time it runs, so that copy is always
 the current one. You will want it again.
 Then answer both parts. One or two sentences each.

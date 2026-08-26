@@ -83,7 +83,7 @@ main() {
         return 1
     fi
 
-    local dest="${CS351_REPO_ROOT}/${ASSIGNMENT}"
+    local dest="${CS351_REPO_ROOT}/src/${ASSIGNMENT}"
     if [[ -e "${dest}" && "${FORCE}" != "True" ]]; then
         >&2 echo "ERROR: ${ASSIGNMENT} already exists in your repository."
         >&2 echo "Use 'begin -f ${ASSIGNMENT}' to overwrite it."
@@ -99,7 +99,8 @@ main() {
     # files -- so the working copy and the baseline disagreed about what the
     # assignment even was.
     rm -rf "${dest}"
-    cp -R "${source}" "${CS351_REPO_ROOT}/"
+    mkdir -p "${CS351_REPO_ROOT}/src"
+    cp -R "${source}" "${CS351_REPO_ROOT}/src/"
     install-references
     record-pristine "${ASSIGNMENT}"
     commit-pristine "${ASSIGNMENT}" || warn-commit-failed "${ASSIGNMENT}"
@@ -192,7 +193,7 @@ record-pristine() {
 
 commit-pristine() {
     local assignment="${1}"
-    local paths=("${assignment}" ".cs351/pristine/${assignment}")
+    local paths=("src/${assignment}" ".cs351/pristine/${assignment}")
     local doc
     while IFS= read -r doc; do
         [[ -n "${doc}" ]] && paths+=("${doc}")

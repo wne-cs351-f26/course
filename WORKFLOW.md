@@ -66,7 +66,7 @@ nothing and keeps the allowance for when you need it.
 begin a1
 ```
 
-That copies the starter files for `a1` into a new `a1/` directory in your
+That copies the starter files for `a1` into a new `src/a1/` directory in your
 repository, and records a pristine copy of them so it is always possible to
 see what you changed.
 
@@ -86,7 +86,7 @@ does it — but it discards your edits to those files permanently, so be sure.
 
 ## Doing the work
 
-Your assignment's files are in the directory `begin` created — `a1/` for
+Your assignment's files are in the directory `begin` created — `src/a1/` for
 assignment 1. Edit them like any other files, in the editor on the left.
 
 You will need a terminal for most questions. If one is not already open,
