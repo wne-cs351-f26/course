@@ -50,6 +50,7 @@ main() {
     # students; that promise has to hold on this path as well.
     if [[ $# -lt 1 ]]; then
         update-course
+        sync-infrastructure
         display-usage
         return 0
     fi
@@ -59,6 +60,7 @@ main() {
     assert-repo-usable
 
     update-course
+    sync-infrastructure
 
     local source="${CS351_COURSE}/src/${ASSIGNMENT}"
     if [[ ! -d "${source}" ]]; then
@@ -101,7 +103,6 @@ main() {
     rm -rf "${dest}"
     mkdir -p "${CS351_REPO_ROOT}/src"
     cp -R "${source}" "${CS351_REPO_ROOT}/src/"
-    install-references
     record-pristine "${ASSIGNMENT}"
     commit-pristine "${ASSIGNMENT}" || warn-commit-failed "${ASSIGNMENT}"
 
@@ -152,33 +153,51 @@ update-course() {
 }
 
 
-# Put the two student-facing references in the student's own repository, where
-# they can be found without knowing a path.
+# Copy the course-controlled files into the student's repository.
 #
-# They live in the course repository rather than in the repository template
-# because the template is copied once at repository creation and never updates,
-# while the course repository is pulled on every begin. Copying them here keeps
-# both properties: they sit next to the student's work, and they are refreshed
-# rather than frozen. A student who edits them loses those edits on the next
-# begin, which is the right trade for reference material.
-install-references() {
-    local doc
-    for doc in GRADING.md WORKFLOW.md; do
-        if [[ -f "${CS351_COURSE}/${doc}" ]]; then
-            cp "${CS351_COURSE}/${doc}" "${CS351_REPO_ROOT}/${doc}"
-        fi
-    done
-}
+# Everything in infra/ belongs to the course: the devcontainer, editor config,
+# .gitignore, the repository README, WORKFLOW.md and GRADING.md. It refreshes on
+# every run, so a correction made in the course repository reaches every student
+# the next time they run begin -- which is the question the old arrangement had
+# no answer to, because template/ was copied once at repository creation.
+#
+# Student work lives under src/ and is never written here. The two namespaces
+# are disjoint, so a mistake in this function cannot reach a student's work.
+#
+# Files removed from infra/ upstream are NOT deleted downstream. The blast
+# radius of a mirror bug is every student repository at once, while the cost of
+# an orphan is a stale file nobody reads.
+sync-infrastructure() {
+    local infra="${CS351_COURSE}/infra"
+    [[ -d "${infra}" ]] || return 0
 
+    # Sync writes files, so it must not run on a repository that cannot be
+    # written to safely. Bare `begin` deliberately does not call
+    # assert-repo-usable -- a read-only query should still answer when a
+    # student's repository is broken -- so this is the only check on that path.
+    if ! cs351_is_git_repo "${CS351_REPO_ROOT}" \
+        || cs351_repo_has_unfinished_merge "${CS351_REPO_ROOT}"; then
+        >&2 echo "NOTE: Course files were not updated -- your repository is not in a"
+        >&2 echo "state it is safe to write to. Your own work is untouched."
+        return 0
+    fi
 
-# Names of reference documents actually present in the student's repository, so
-# that staging them cannot fail on a course repository that lacks one.
-reference-paths() {
-    local doc
-    for doc in GRADING.md WORKFLOW.md; do
-        [[ -f "${CS351_REPO_ROOT}/${doc}" ]] && echo "${doc}"
-    done
-    return 0
+    local -a entries=()
+    local entry
+    while IFS= read -r entry; do
+        [[ -n "${entry}" ]] && entries+=("${entry}")
+    done < <(cd "${infra}" && find . -mindepth 1 -maxdepth 1 -printf '%P\n' | sort)
+    [[ ${#entries[@]} -gt 0 ]] || return 0
+
+    cp -R "${infra}/." "${CS351_REPO_ROOT}/"
+
+    git -C "${CS351_REPO_ROOT}" add -- "${entries[@]}" >/dev/null 2>&1 || return 0
+    if git -C "${CS351_REPO_ROOT}" diff --cached --quiet -- "${entries[@]}"; then
+        return 0
+    fi
+    git -C "${CS351_REPO_ROOT}" commit --quiet --only "${entries[@]}" \
+        -m "chore: update course files" >/dev/null 2>&1 \
+        || >&2 echo "NOTE: Course files were updated but could not be committed."
 }
 
 
@@ -194,10 +213,6 @@ record-pristine() {
 commit-pristine() {
     local assignment="${1}"
     local paths=("src/${assignment}" ".cs351/pristine/${assignment}")
-    local doc
-    while IFS= read -r doc; do
-        [[ -n "${doc}" ]] && paths+=("${doc}")
-    done < <(reference-paths)
 
     git -C "${CS351_REPO_ROOT}" add "${paths[@]}" >/dev/null 2>&1 || return 1
 

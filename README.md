@@ -5,13 +5,11 @@ Public. Holds assignment starter code and the student CLI.
 - `src/<assignment>/` — starter files. `begin <assignment>` copies these
   into a student's repository.
 - `bin/` — the `begin` and `save` commands.
-- `template/` — the skeleton seeded into each student repository.
-- `WORKFLOW.md` — student-facing; codespaces, `begin`, `save`, and keeping
-  work between sessions. Lives here rather than in `template/` because the
-  template is copied once at repository creation and never updates again,
-  while this is pulled on every `begin`.
-- `GRADING.md` — student-facing; how every assignment is scored. Same
-  reasoning, plus one URL that works for both Kodiak shells.
+- `infra/` — course-controlled files: the devcontainer, editor config,
+  `.gitignore`, the repository README, [`WORKFLOW.md`](infra/WORKFLOW.md)
+  and [`GRADING.md`](infra/GRADING.md). Seeded into a student's repository
+  root at creation and refreshed on every `begin`, so a correction reaches
+  every student without them doing anything.
 
 **No solutions here.** Solutions live in the instructor's private
 repository. Anything committed here is world-readable.

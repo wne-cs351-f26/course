@@ -358,55 +358,6 @@ def test_begin_force_is_quiet_when_nothing_changed(student, course):
     assert "nothing to commit" not in r.stderr
 
 
-def test_begin_installs_reference_docs(student, course):
-    """GRADING.md and WORKFLOW.md land in the student's own repository.
-
-    They live in the course repository rather than the template so that they
-    refresh: the template is copied once at repository creation and never
-    updates. Copying them on every begin keeps them next to the student's work
-    AND current, which is why a1's handout can link ../GRADING.md.
-    """
-    (course / "GRADING.md").write_text("v1 grading\n")
-    (course / "WORKFLOW.md").write_text("v1 workflow\n")
-    git(course, "add", "-A")
-    git(course, "commit", "-q", "-m", "add references")
-
-    r = run_begin(student, course, "a1")
-    assert r.returncode == 0, r.stderr
-    assert (student / "GRADING.md").read_text() == "v1 grading\n"
-    assert (student / "WORKFLOW.md").read_text() == "v1 workflow\n"
-
-    # committed, not left dangling for `save` to sweep up later
-    tracked = git(student, "ls-files").stdout.split()
-    assert "GRADING.md" in tracked
-    assert "WORKFLOW.md" in tracked
-
-
-def test_begin_refreshes_reference_docs(student, course):
-    """An updated reference reaches a student who has already begun work."""
-    (course / "GRADING.md").write_text("v1\n")
-    git(course, "add", "-A")
-    git(course, "commit", "-q", "-m", "references v1")
-    run_begin(student, course, "a1")
-    assert (student / "GRADING.md").read_text() == "v1\n"
-
-    (course / "GRADING.md").write_text("v2\n")
-    git(course, "add", "-A")
-    git(course, "commit", "-q", "-m", "references v2")
-
-    r = run_begin(student, course, "-f", "a1")
-    assert r.returncode == 0, r.stderr
-    assert (student / "GRADING.md").read_text() == "v2\n"
-
-
-def test_begin_works_without_reference_docs(student, course):
-    """A course repository lacking them must not break begin."""
-    r = run_begin(student, course, "a1")
-    assert r.returncode == 0, r.stderr
-    assert (student / "src" / "a1" / "README.md").exists()
-    assert not (student / "GRADING.md").exists()
-
-
 def test_begin_puts_assignments_under_src(student, course):
     """Student work lives under src/; nothing else in the repo does.
 
@@ -416,4 +367,106 @@ def test_begin_puts_assignments_under_src(student, course):
     r = run_begin(student, course, "a1")
     assert r.returncode == 0, r.stderr
     assert (student / "src" / "a1" / "grammar").exists()
+    assert not (student / "a1").exists()
+
+
+def make_infra(course, files):
+    """Give the course repo an infra/ directory and commit it."""
+    infra = course / "infra"
+    infra.mkdir(exist_ok=True)
+    for name, text in files.items():
+        path = infra / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(text)
+    git(course, "add", "-A")
+    git(course, "commit", "-q", "-m", "infra")
+    return infra
+
+
+def test_bare_begin_syncs_infrastructure(student, course):
+    """Listing refreshes course files: it is the command with no side effects
+    on student work, so it is the one a student can safely run any time."""
+    make_infra(course, {"GRADING.md": "v1\n", ".gitignore": "tmp\n"})
+    r = run_begin(student, course)
+    assert r.returncode == 0, r.stderr
+    assert (student / "GRADING.md").read_text() == "v1\n"
+    assert (student / ".gitignore").read_text() == "tmp\n"
+
+
+def test_begin_assignment_syncs_infrastructure(student, course):
+    make_infra(course, {"GRADING.md": "v1\n"})
+    r = run_begin(student, course, "a1")
+    assert r.returncode == 0, r.stderr
+    assert (student / "GRADING.md").read_text() == "v1\n"
+
+
+def test_sync_refreshes_a_changed_file(student, course):
+    make_infra(course, {"GRADING.md": "v1\n"})
+    run_begin(student, course)
+    assert (student / "GRADING.md").read_text() == "v1\n"
+
+    (course / "infra" / "GRADING.md").write_text("v2\n")
+    git(course, "add", "-A")
+    git(course, "commit", "-q", "-m", "infra v2")
+
+    r = run_begin(student, course)
+    assert r.returncode == 0, r.stderr
+    assert (student / "GRADING.md").read_text() == "v2\n"
+
+
+def test_sync_does_not_delete_files_dropped_upstream(student, course):
+    """Add-and-overwrite, not mirror. A mirror bug would delete files from every
+    student repository; an orphan is a stale file nobody reads."""
+    make_infra(course, {"GRADING.md": "v1\n", "OLD.md": "old\n"})
+    run_begin(student, course)
+    assert (student / "OLD.md").exists()
+
+    (course / "infra" / "OLD.md").unlink()
+    git(course, "add", "-A")
+    git(course, "commit", "-q", "-m", "drop OLD.md")
+
+    run_begin(student, course)
+    assert (student / "OLD.md").exists()
+
+
+def test_sync_commits_and_leaves_a_clean_tree(student, course):
+    make_infra(course, {"GRADING.md": "v1\n"})
+    r = run_begin(student, course)
+    assert r.returncode == 0, r.stderr
+    assert git(student, "status", "--porcelain").stdout.strip() == ""
+    assert "GRADING.md" in git(student, "ls-files").stdout.split()
+
+
+def test_sync_makes_no_commit_when_nothing_changed(student, course):
+    make_infra(course, {"GRADING.md": "v1\n"})
+    run_begin(student, course)
+    before = git(student, "rev-parse", "HEAD").stdout.strip()
+    r = run_begin(student, course)
+    assert r.returncode == 0, r.stderr
+    assert git(student, "rev-parse", "HEAD").stdout.strip() == before
+
+
+def test_sync_soft_fails_on_an_unfinished_merge(student, course):
+    """A read-only query must still answer when the repository is broken --
+    that is often exactly when a student is trying to work out what is wrong."""
+    make_infra(course, {"GRADING.md": "v1\n"})
+    (student / ".git" / "MERGE_HEAD").write_text("deadbeef\n")
+
+    r = run_begin(student, course)
+    assert r.returncode == 0, r.stderr
+    assert "a1" in r.stderr
+    assert "not updated" in r.stderr
+    assert not (student / "GRADING.md").exists()
+
+
+def test_sync_never_writes_under_src(student, course):
+    """src/ belongs to the student. Sync must not touch it under any input."""
+    make_infra(course, {"GRADING.md": "v1\n"})
+    run_begin(student, course, "a1")
+    (student / "src" / "a1" / "grammar").write_text("student work\n")
+    git(student, "add", "-A")
+    git(student, "commit", "-q", "-m", "work")
+
+    run_begin(student, course)
+    assert (student / "src" / "a1" / "grammar").read_text() == "student work\n"
     assert not (student / "a1").exists()

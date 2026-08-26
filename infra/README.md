@@ -25,16 +25,14 @@ only inside a temporary container.
 
 ## Read these two, early
 
-- **[How to Work on CS351](https://github.com/wne-cs351-f26/course/blob/main/WORKFLOW.md)**
+- **[How to Work on CS351](WORKFLOW.md)**
   — codespaces, `begin`, `save`, keeping your work between sessions, and what
   to do when something breaks. Short, and it answers most questions.
-- **[How Homework Is Graded](https://github.com/wne-cs351-f26/course/blob/main/GRADING.md)**
+- **[How Homework Is Graded](GRADING.md)**
   — the same three criteria for every assignment. Comments on your work are
   advice, not deductions.
 
-Both are linked above on the web, so they work before your codespace exists.
-Once you have run `begin` for the first time, copies of both also appear in
-this repository, refreshed every time `begin` runs.
+Both are already in this repository, refreshed every time `begin` runs.
 
 ## If something goes wrong
 
