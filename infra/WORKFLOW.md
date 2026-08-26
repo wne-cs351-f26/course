@@ -166,17 +166,19 @@ Your repository holds two kinds of file.
 **Your work lives under `src/`.** `begin a1` creates `src/a1/`, and everything
 in it is yours: the handout you write answers into, the files you edit, anything
 you add. Nothing the course does will ever overwrite it. The one exception is
-`begin -f`, which you have to ask for by name, and which tells you what it is
-about to discard.
+`begin -f`, which you have to ask for by name; it says what it is about to
+discard before it does it.
 
 **Everything else belongs to the course** — `README.md`, `GRADING.md`, this
 file, `.gitignore`, and the `.devcontainer` and `.vscode` directories. Every
 time you run `begin`, those are refreshed from the course repository. If I fix a
-mistake in the grading document, you get the fix automatically. If you edit one
-of them, your edit is replaced the next time you run `begin`.
+mistake in the grading document, you get the fix automatically.
 
-Nothing is lost when that happens: `save` has already committed your work, so
-the old version stays in your repository's history.
+**The other side of that: if you edit one of those files, your edit is gone the
+next time you run `begin`**, and there is no warning and nothing to undo. It is
+only recoverable if you happened to run `save` in between. So do not keep notes
+in them — keep notes inside your assignment directory under `src/`, where
+nothing the course does will touch them.
 
 If your repository is in a state that cannot be written to safely — an
 unfinished merge, most likely — `begin` says so and skips the refresh rather

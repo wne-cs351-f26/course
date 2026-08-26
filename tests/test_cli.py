@@ -444,6 +444,10 @@ def test_sync_makes_no_commit_when_nothing_changed(student, course):
     r = run_begin(student, course)
     assert r.returncode == 0, r.stderr
     assert git(student, "rev-parse", "HEAD").stdout.strip() == before
+    # The spec says a no-op sync makes no commit AND no output. Without the
+    # staged-changes guard, git commit fails on its own and the NOTE fires on
+    # every single run.
+    assert "could not be committed" not in r.stderr
 
 
 def test_sync_soft_fails_on_an_unfinished_merge(student, course):
