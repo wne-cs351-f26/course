@@ -48,7 +48,16 @@ a tool version, the setup script — and rebuilding is how you get it. Ignoring
 it leaves you on the old environment, which is where "it works for everyone
 else" comes from.
 
-You can finish the sentence you are typing first. Do not put it off for days.
+**The notification goes away after a few seconds.** If it disappears before you
+decide, or you would rather finish what you are doing first, you can rebuild
+whenever you like:
+
+1. Press **Ctrl+Shift+P** (**Cmd+Shift+P** on a Mac) to open the command palette.
+2. Type `rebuild` and choose **Codespaces: Rebuild Container**.
+3. If it asks, choose **Rebuild** rather than Full Rebuild — it is faster and
+   does the same thing here.
+
+Do not put it off for days.
 
 **Rebuilding is safe.** Everything in your repository is kept, including work
 you have not saved yet. The parts that do get rebuilt — the course commands,
