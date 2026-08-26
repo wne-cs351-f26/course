@@ -42,6 +42,26 @@ Do not go looking for a "setup finished" message in the terminal — the setup
 runs before your terminal exists, and its output goes to a build log you will
 never normally see. Running `begin` is the check.
 
+### If VS Code offers to rebuild the container
+
+Sometimes, after `begin`, VS Code shows a bar saying the dev container
+configuration has changed and offering to **Rebuild**.
+
+**Say yes.** It means I have changed something about the environment itself —
+a tool version, the setup script — and rebuilding is how you get it. Ignoring
+it leaves you on the old environment, which is where "it works for everyone
+else" comes from.
+
+You can finish the sentence you are typing first. Do not put it off for days.
+
+**Rebuilding is safe.** Everything in your repository is kept, including work
+you have not saved yet. The parts that do get rebuilt — the course commands,
+the course files under your home directory — are put back automatically as part
+of the rebuild. It takes about three minutes, the same as the first build.
+
+You will only see this when the environment genuinely changed. Ordinary updates
+to the course documents do not trigger it.
+
 ### Coming back to it
 
 **Reopen the codespace you already have. Do not create a second one.**

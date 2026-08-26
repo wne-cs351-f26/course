@@ -19,6 +19,9 @@ CS351_REPO_ROOT="${CS351_REPO_ROOT:-$PWD}"
 _self="$(readlink -f "${BASH_SOURCE[0]}")"
 source "$(dirname "${_self}")/.cs351-lib.bash"
 
+# The variable is a hint; the repository's top level is the truth.
+CS351_REPO_ROOT="$(cs351_resolve_repo_root "${CS351_REPO_ROOT}")"
+
 
 main() {
     if ! assert-repo-usable; then

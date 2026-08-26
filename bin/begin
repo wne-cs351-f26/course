@@ -33,6 +33,9 @@ CS351_COURSE="${CS351_COURSE:-$HOME/.local/share/cs351/course}"
 _self="$(readlink -f "${BASH_SOURCE[0]}")"
 source "$(dirname "${_self}")/.cs351-lib.bash"
 
+# The variable is a hint; the repository's top level is the truth.
+CS351_REPO_ROOT="$(cs351_resolve_repo_root "${CS351_REPO_ROOT}")"
+
 
 main() {
     FORCE=False
@@ -183,15 +186,9 @@ sync-infrastructure() {
     # written to safely. Bare `begin` deliberately does not call
     # assert-repo-usable -- a read-only query should still answer when a
     # student's repository is broken -- so this is the only check on that path.
-    # cs351_is_git_repo is true from ANY subdirectory of a repository, so on its
-    # own it would let sync write into, say, src/a1/ if CS351_REPO_ROOT were set
-    # to a subdirectory -- which .devcontainer/setup.bash can do, since it falls
-    # back to $PWD when CONTAINER_WORKSPACE_FOLDER is unset. Require the path to
-    # BE the top level, not merely to sit inside one.
-    local toplevel=""
-    toplevel="$(git -C "${CS351_REPO_ROOT}" rev-parse --show-toplevel 2>/dev/null || true)"
-    if [[ -z "${toplevel}" ]] \
-        || [[ "$(realpath -m "${toplevel}")" != "$(realpath -m "${CS351_REPO_ROOT}")" ]] \
+    # CS351_REPO_ROOT was resolved to the repository's top level at startup, so
+    # a shell opened inside src/a1 cannot steer sync into the student's work.
+    if ! cs351_is_git_repo "${CS351_REPO_ROOT}" \
         || cs351_repo_has_unfinished_merge "${CS351_REPO_ROOT}"; then
         >&2 echo "NOTE: Course files were not updated -- your repository is not in a"
         >&2 echo "state it is safe to write to. Your own work is untouched."

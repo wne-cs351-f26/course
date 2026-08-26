@@ -522,3 +522,32 @@ def test_a_solution_is_just_an_assignment(student, course):
     r = run_begin(student, course, "a1-sol")
     assert r.returncode == 0, r.stderr
     assert (student / "src" / "a1-sol" / "answers.md").exists()
+
+
+def test_repo_root_is_resolved_from_a_subdirectory(student, course):
+    """A shell opened inside the student's work must not steer begin into it.
+
+    CS351_REPO_ROOT is exported from ~/.bashrc as ${CONTAINER_WORKSPACE_FOLDER:-$PWD},
+    and CONTAINER_WORKSPACE_FOLDER is unset in the course image -- so running
+    `bash` from inside src/a1 sets the variable to src/a1. Unresolved, begin
+    creates src/a1/src/a2 and drops course files into the assignment.
+    """
+    make_infra(course, {"GRADING.md": "v1\n"})
+    run_begin(student, course, "a1")
+    (student / "src" / "a1" / "grammar").write_text("student work\n")
+
+    (course / "released.txt").write_text("a1\na2\n")
+    git(course, "add", "-A")
+    git(course, "commit", "-q", "-m", "release a2")
+
+    inside = student / "src" / "a1"
+    env = dict(os.environ, CS351_REPO_ROOT=str(inside), CS351_COURSE=str(course))
+    r = subprocess.run([os.path.join(BIN, "begin"), "a2"], capture_output=True,
+                       text=True, env=env, cwd=str(inside))
+
+    assert r.returncode == 0, r.stderr
+    # a2 landed at the repository top level, not nested inside a1
+    assert (student / "src" / "a2" / "grammar").exists()
+    assert not (inside / "src").exists()
+    assert not (inside / "GRADING.md").exists()
+    assert (inside / "grammar").read_text() == "student work\n"

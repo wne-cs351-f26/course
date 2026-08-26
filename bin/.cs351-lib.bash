@@ -18,6 +18,27 @@
 # in bin/ -- including this one -- and bash would otherwise resume reading at
 # an offset into the new content. See the longer note in `begin`.
 {
+# The top level of the repository containing `start`, or `start` itself when it
+# is not in one (so callers can still report a sensible path in their error).
+#
+# CS351_REPO_ROOT is exported from ~/.bashrc as ${CONTAINER_WORKSPACE_FOLDER:-$PWD},
+# and CONTAINER_WORKSPACE_FOLDER is NOT set in this image -- so its value is
+# whatever $PWD happened to be when .bashrc was sourced. Start a shell from
+# inside src/a1 and the variable points at src/a1, which would have begin
+# writing src/a1/src/a1 and syncing course files into the student's own
+# assignment directory. Resolving to the top level makes the variable a hint
+# rather than something that has to be right.
+cs351_resolve_repo_root() {
+    local start="${1}" top
+    top="$(git -C "${start}" rev-parse --show-toplevel 2>/dev/null || true)"
+    if [[ -n "${top}" ]]; then
+        printf '%s\n' "${top}"
+    else
+        printf '%s\n' "${start}"
+    fi
+}
+
+
 cs351_is_git_repo() {
     git -C "${1}" rev-parse --git-dir >/dev/null 2>&1
 }
