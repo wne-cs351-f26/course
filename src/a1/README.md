@@ -40,8 +40,9 @@ You should be able to look at a simple pattern and say which strings it
 matches, and to write one that matches some strings and not others. No question
 asks for this directly; it is what the rest of the assignment stands on.
 
-If you are rusty, work [RegexOne](https://regexone.com/) lessons 1 through 9
-before starting. It takes under an hour.
+**Work [RegexOne](https://regexone.com/) lessons 1 through 9 before starting.**
+They are required. There is nothing to submit; the practice comes back on
+question 3 and on Exam 1. It takes under an hour.
 
 ### What you will be able to do
 
