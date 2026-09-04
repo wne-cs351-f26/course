@@ -1,0 +1,4 @@
+skip WHITESPACE '\s+'
+token HI 'hi'
+token WORD '\w+'
+token ANY '.+'

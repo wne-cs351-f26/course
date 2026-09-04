@@ -1,0 +1,3 @@
+skip WHITESPACE '\s+'
+token FROM 'from'
+token WORD '\w+'
