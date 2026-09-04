@@ -3,6 +3,9 @@
 Java/
 ## Ignore generated Python/ directories.
 Python/
+## Ignore the PLCC-ng scanner/parser cache. Written into whatever directory
+## plcc-scan is run from, so it appears next to the spec.plcc being worked on.
+plcc-ng/
 
 # Compiled class file
 *.class
