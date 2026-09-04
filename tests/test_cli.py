@@ -450,6 +450,50 @@ def test_sync_makes_no_commit_when_nothing_changed(student, course):
     assert "could not be committed" not in r.stderr
 
 
+def test_sync_does_not_rewrite_an_unchanged_file(student, course):
+    """A no-op sync must not touch the file at all, not merely avoid committing.
+
+    cp opens the destination O_WRONLY|O_TRUNC, so it rewrites byte-identical
+    files. That is a write event, and VS Code's Dev Containers extension
+    watches .devcontainer/devcontainer.json and offers to rebuild whenever it
+    sees one -- it does not compare content. Students got the rebuild prompt on
+    every begin.
+
+    test_sync_makes_no_commit_when_nothing_changed does not catch this: it
+    asserts git made no commit, which is true regardless, because the rewritten
+    bytes are identical and git has nothing to record.
+    """
+    make_infra(course, {".devcontainer/devcontainer.json": '{"name": "cs351"}\n'})
+    run_begin(student, course)
+    target = student / ".devcontainer" / "devcontainer.json"
+    before = target.stat().st_mtime_ns
+
+    r = run_begin(student, course)
+
+    assert r.returncode == 0, r.stderr
+    assert target.stat().st_mtime_ns == before, (
+        "unchanged file was rewritten; a file watcher sees that as a change"
+    )
+
+
+def test_sync_still_refreshes_a_changed_nested_file(student, course):
+    """The guard must not cost us the thing sync exists for. A correction made
+    upstream still has to reach the student, at any depth."""
+    make_infra(course, {".devcontainer/devcontainer.json": '{"name": "old"}\n'})
+    run_begin(student, course)
+    target = student / ".devcontainer" / "devcontainer.json"
+    assert target.read_text() == '{"name": "old"}\n'
+
+    (course / "infra" / ".devcontainer" / "devcontainer.json").write_text(
+        '{"name": "new"}\n')
+    git(course, "add", "-A")
+    git(course, "commit", "-q", "-m", "devcontainer v2")
+
+    r = run_begin(student, course)
+    assert r.returncode == 0, r.stderr
+    assert target.read_text() == '{"name": "new"}\n'
+
+
 def test_sync_soft_fails_on_an_unfinished_merge(student, course):
     """A read-only query must still answer when the repository is broken --
     that is often exactly when a student is trying to work out what is wrong."""

@@ -210,10 +210,10 @@ sync-infrastructure() {
     done < <(cd "${infra}" && find . -mindepth 1 -maxdepth 1 -printf '%P\n' | sort)
     [[ ${#entries[@]} -gt 0 ]] || return 0
 
-    # cp is a bare command under `set -e`; an unwritable destination would kill
-    # begin outright, and the listing path in particular has to keep answering.
+    # A failure here must not kill begin outright -- the listing path in
+    # particular has to keep answering -- so the soft-fail wraps the whole walk.
     for entry in "${entries[@]}"; do
-        if ! cp -R "${infra}/${entry}" "${CS351_REPO_ROOT}/" 2>/dev/null; then
+        if ! sync-tree "${infra}/${entry}" "${CS351_REPO_ROOT}/${entry}"; then
             >&2 echo "NOTE: Course files could not be updated. Your own work is"
             >&2 echo "untouched. Tell your instructor if this keeps happening."
             return 0
@@ -237,6 +237,57 @@ sync-infrastructure() {
     git -C "${CS351_REPO_ROOT}" commit --quiet --only "${entries[@]}" \
         -m "chore: update course files" >/dev/null 2>&1 \
         || >&2 echo "NOTE: Course files were updated but could not be committed."
+}
+
+
+# Mirror SRC onto DEST, writing ONLY the files whose content actually differs.
+# SRC may be a file or a directory. Files present at DEST but not in SRC are
+# left alone -- that is the add-and-overwrite behaviour cp -R had, and the
+# reason for it is in sync-infrastructure's comment above.
+#
+# Why not `cp -R`: cp opens its destination O_WRONLY|O_TRUNC, so it rewrites
+# byte-identical files on every run. That is a write event, and VS Code's Dev
+# Containers extension offers to rebuild whenever it sees one touch
+# .devcontainer/devcontainer.json -- it watches for writes and does not compare
+# content. Students got the rebuild prompt on every single begin.
+#
+# Why not `cp -u`: that compares timestamps rather than content, so a student
+# who edited a course-owned file would keep their edit whenever its mtime was
+# the newer one. Course files have to win, so the comparison must be on bytes.
+sync-tree() {
+    local src="${1}" dest="${2}"
+
+    if [[ -f "${src}" ]]; then
+        write-if-different "${src}" "${dest}"
+        return
+    fi
+
+    [[ -d "${src}" ]] || return 0
+    mkdir -p "${dest}" 2>/dev/null || return 1
+
+    local rel
+    while IFS= read -r rel; do
+        if [[ -d "${src}/${rel}" ]]; then
+            mkdir -p "${dest}/${rel}" 2>/dev/null || return 1
+        else
+            write-if-different "${src}/${rel}" "${dest}/${rel}" || return 1
+        fi
+    done < <(cd "${src}" && find . -mindepth 1 -printf '%P\n' | sort)
+}
+
+
+# Copy only when the bytes differ, so an unchanged file is never opened for
+# writing. The -e guard comes first because `cmp -s` still writes to stderr when
+# a file is missing, and a student should not see that on the first sync.
+write-if-different() {
+    local src="${1}" dest="${2}"
+
+    if [[ -e "${dest}" ]] && cmp -s "${src}" "${dest}"; then
+        return 0
+    fi
+
+    mkdir -p "$(dirname "${dest}")" 2>/dev/null || return 1
+    cp "${src}" "${dest}" 2>/dev/null
 }
 
 
