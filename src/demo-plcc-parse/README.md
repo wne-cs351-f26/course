@@ -258,12 +258,14 @@ Match it against the grammar line by line:
 a class and its fields. Run `plcc-diagram` on a rule you are unsure about and
 check yourself.
 
-> **The syntax diagram is broken for these grammars, and it is not your fault.**
-> `syntax.png` comes out saying *Syntax error!* for any grammar with an empty
-> alternative — which is `spec.plcc`, `cap.plcc`, and `empty.plcc`. The bug is
-> in how PLCC writes the drawing, not in your specification; the class diagram
-> beside it is fine, and so is your grammar. It **does** work on `rep.plcc` in
-> the next section. Reported upstream.
+> **If `syntax.png` says *Syntax error!*, it is not your fault.** That happens
+> for grammars with an empty alternative — `spec.plcc`, `cap.plcc`, and
+> `empty.plcc` — and it is a bug in how PLCC writes the drawing, not a problem
+> with your specification. The class diagram beside it is still correct, and so
+> is your grammar. The fix has been sent upstream, so depending on when your
+> container was built you may find it already works; either way, the class
+> diagram is the one this section is about, and `rep.plcc` in the next section
+> draws correctly regardless.
 
 > `plcc-diagram` renders over the network, so it needs a working connection.
 > Everything else in this sandbox runs locally.
