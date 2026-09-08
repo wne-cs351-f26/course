@@ -1,0 +1,9 @@
+# The obvious grammar. PLCC will not accept it.
+skip  WHITESPACE '\s+'
+token NUM        '\d+'
+token COMMA      ','
+
+%
+
+<List:Only> ::= <NUM>
+<List:More> ::= <NUM> COMMA <List>

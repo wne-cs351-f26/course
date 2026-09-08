@@ -1,0 +1,10 @@
+# A list of comma-separated natural numbers.
+skip  WHITESPACE '\s+'
+token NUM        '\d+'
+token COMMA      ','
+
+%
+
+<List>          ::= <NUM> <ListTail>
+<ListTail:Some> ::= COMMA <NUM> <ListTail>
+<ListTail:Zero> ::=

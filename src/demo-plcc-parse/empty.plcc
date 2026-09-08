@@ -1,0 +1,11 @@
+# spec.plcc, extended so the empty list is also legal.
+skip  WHITESPACE '\s+'
+token NUM        '\d+'
+token COMMA      ','
+
+%
+
+<List:LSome>    ::= <NUM> <ListTail>
+<List:LZero>    ::=
+<ListTail:Some> ::= COMMA <NUM> <ListTail>
+<ListTail:Zero> ::=
