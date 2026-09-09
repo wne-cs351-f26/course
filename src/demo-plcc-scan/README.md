@@ -20,6 +20,27 @@ front of you, so you can run it yourself instead of watching me run it.
 It is also the mechanism **A1 question 3 asks you to explain** — steps 6, 7 and
 10 all turn on it. Play with it here first, where being wrong is free.
 
+## Before you run anything — be in the right directory
+
+`begin` put these files in `src/demo-plcc-scan/` inside your repository. Every command
+below assumes that is where your terminal is:
+
+```bash
+cd src/demo-plcc-scan
+```
+
+Three things depend on it, and all three fail in confusing ways rather than
+obvious ones:
+
+- **`-s spec.plcc` is a relative path.** From anywhere else, that file does not
+  exist and you get an error about the specification, not about your directory.
+- **`plcc-ng/` is written into whatever directory you run from.** It is the build
+  cache, and it belongs next to the specification it was built from.
+- **The sticky `-s` is remembered inside that `plcc-ng/`**, so a different
+  directory remembers a different specification.
+
+If a command surprises you, check `pwd` before you check anything else.
+
 ## The files
 
 | File | What it is |

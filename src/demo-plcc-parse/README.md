@@ -25,6 +25,27 @@ being wrong is free.
 If you have not done the scanner sandbox yet, do that one first:
 `begin demo-plcc-scan`. This one picks up where it stops.
 
+## Before you run anything — be in the right directory
+
+`begin` put these files in `src/demo-plcc-parse/` inside your repository. Every command
+below assumes that is where your terminal is:
+
+```bash
+cd src/demo-plcc-parse
+```
+
+Three things depend on it, and all three fail in confusing ways rather than
+obvious ones:
+
+- **`-s spec.plcc` is a relative path.** From anywhere else, that file does not
+  exist and you get an error about the specification, not about your directory.
+- **`plcc-ng/` is written into whatever directory you run from.** It is the build
+  cache, and it belongs next to the specification it was built from.
+- **The sticky `-s` is remembered inside that `plcc-ng/`**, so a different
+  directory remembers a different specification.
+
+If a command surprises you, check `pwd` before you check anything else.
+
 ## The files
 
 | File | What it is |
@@ -147,6 +168,11 @@ way `<ListTail>` was split:
 $ printf "" | plcc-parse -s empty.plcc
 LZero (empty)
 ```
+
+Notice the root node is called `LZero`, not `List`. A node is named for the
+**alternative** that matched, and now that `<List>` has alternatives, that
+applies at the top of the tree too — the same rule you already saw give you
+`Some` and `Zero`.
 
 **The same pattern, applied twice.** That is the technique, not a special case.
 
@@ -324,7 +350,15 @@ No answers below, and nothing to hand in. Predict first, then run.
   parses. Then try `**=` with no `+` and compare.
 - Write two rules with the same left-hand side that start with the same token,
   on purpose, and read the LL(1) error. Then fix it by left-factoring.
-- Run `plcc-diagram` on your own broken grammars. Does the class diagram tell
-  you anything the error message did not?
+  **If you use the same token twice on one right-hand side, name the copies** —
+  `<NUM:left> PLUS <NUM:right>` — or you get a *duplicate RHS symbol name* error
+  instead, which is a different complaint and not the one you were after.
+- Run `plcc-diagram` on `empty.plcc`, then on `rep.plcc`. Both describe a
+  possibly-empty list of numbers. How do the two class diagrams differ, and
+  which one matches the shape of the tree each actually produces?
+- Now break a grammar on purpose and run `plcc-diagram` on it. You get no
+  picture at all — not a partial one. Worth knowing why: the diagram is drawn
+  from a grammar that already passed, so when something is wrong the error
+  message is the only tool you have. That is the normal case, not a failure.
 
 Reset whenever you want with `begin -f demo-plcc-parse`.
