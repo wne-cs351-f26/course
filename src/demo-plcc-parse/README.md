@@ -199,21 +199,15 @@ Two things to notice in that output, because together they are confusing:
   section 1 prints only what was captured. Both are true and they are not in
   conflict.
 
-**The error message is the thing to read.** It gives you three facts an exit
-status never will: *where* it stopped (`-:1:2`), what it *wanted* (`'NUM'`), and
-what it *got* (end of file). That is enough to fix the input or the grammar.
-Every failure prints one — there is no such thing as a silent failure here.
+**The error message is the thing to read**, and it is the last line rather than
+the first. This one gives you three facts: *where* it stopped (`-:1:2`), what it
+*wanted* (`'NUM'`), and what it *got* (end of file). That is enough to fix
+either the input or the grammar.
 
-> **Do not reach for the exit status instead.** You will see the trick
-> `plcc-parse … > /dev/null && echo PASS || echo FAIL` used to check a lot of
-> inputs at once, and for that it is fine. But `> /dev/null` throws away the
-> diagnostics — they go to stdout — so you learn *that* something failed and
-> lose *what*. And it does not generalise: `plcc-scan` reports a lexical error
-> and **still exits 0**, so on the scanner the exit status will tell you
-> everything is fine while the output tells you it is not.
->
-> Read the output. Use the exit status only when a script has to check many
-> inputs and nobody is going to read them.
+**Every failure prints one.** There is no such thing as a silent failure here,
+so if you read to the bottom and there is no error, it parsed.
+
+So the habit is simply: **run it, read all of it, look at the last line.**
 
 ## 5 — A grammar that is right, and still refused
 
