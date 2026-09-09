@@ -176,7 +176,7 @@ applies at the top of the tree too — the same rule you already saw give you
 
 **The same pattern, applied twice.** That is the technique, not a special case.
 
-## 4 — Judge by the exit status, not by what is printed
+## 4 — Read to the end of the output
 
 ```console
 $ echo "1," | plcc-parse -s spec.plcc
@@ -188,7 +188,8 @@ plcc-parser-table: -:1:2: error: expected 'NUM', got end of file
 ```
 
 It printed part of a tree **and then failed**. `plcc-parse` streams the tree as
-it goes, so output appearing does not mean the parse succeeded.
+it goes, so **a tree appearing does not mean the parse succeeded** — the answer
+is on the last line, not the first.
 
 Two things to notice in that output, because together they are confusing:
 
@@ -198,18 +199,21 @@ Two things to notice in that output, because together they are confusing:
   section 1 prints only what was captured. Both are true and they are not in
   conflict.
 
-So test with the exit status:
+**The error message is the thing to read.** It gives you three facts an exit
+status never will: *where* it stopped (`-:1:2`), what it *wanted* (`'NUM'`), and
+what it *got* (end of file). That is enough to fix the input or the grammar.
+Every failure prints one — there is no such thing as a silent failure here.
 
-```console
-$ echo "1," | plcc-parse -s spec.plcc >/dev/null && echo PASS || echo FAIL
-FAIL
-$ echo "1, 2" | plcc-parse -s spec.plcc >/dev/null && echo PASS || echo FAIL
-PASS
-```
-
-Nothing but `PASS` or `FAIL` — the diagnostics go to stdout, so `>/dev/null`
-silences everything. **This is how you test a parser**: by exit status, not by
-eye. It starts mattering the moment you have more than one input to check.
+> **Do not reach for the exit status instead.** You will see the trick
+> `plcc-parse … > /dev/null && echo PASS || echo FAIL` used to check a lot of
+> inputs at once, and for that it is fine. But `> /dev/null` throws away the
+> diagnostics — they go to stdout — so you learn *that* something failed and
+> lose *what*. And it does not generalise: `plcc-scan` reports a lexical error
+> and **still exits 0**, so on the scanner the exit status will tell you
+> everything is fine while the output tells you it is not.
+>
+> Read the output. Use the exit status only when a script has to check many
+> inputs and nobody is going to read them.
 
 ## 5 — A grammar that is right, and still refused
 
