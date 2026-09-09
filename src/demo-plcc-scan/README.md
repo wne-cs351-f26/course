@@ -95,11 +95,19 @@ token ANY '.+'
 
 Three rules can match at the start of `hi there`. Before you run it, decide
 which one you think wins. Then use `-t`, which prints the candidate table and
-stars the winner:
+stars the winner.
+
+> **`-t` prints more than the tables shown below, and that is normal.** For every
+> position it reaches, it prints a `Scanning -:1:1:` header with a caret under the
+> spot, then the candidate table, then a `Result:` line. It does this for the
+> **trailing newline too**, so a one-line input gives you *two* blocks — the
+> second one is just `WHITESPACE` matching `'\n'`, and you can ignore it.
+> **The excerpts below are the candidate tables only**, because that is where the
+> answer is. Your screen will show more.
 
 ```console
 $ echo "hi there" | plcc-scan -t -s tie1.plcc
-
+...
 Candidates:
 #  Type   Name  Pattern  Len  Match
 2  token  HI    'hi'     2    'hi'
@@ -123,7 +131,7 @@ token FROM 'from'
 
 ```console
 $ echo "from" | plcc-scan -t -s tie2.plcc
-
+...
 Candidates:
 #   Type   Name  Pattern  Len  Match
 2*  token  WORD  '\w+'    4    'from'
@@ -150,7 +158,7 @@ fire.
 
 ```console
 $ echo "from" | plcc-scan -t -s tie3.plcc
-
+...
 Candidates:
 #   Type   Name  Pattern  Len  Match
 2*  token  FROM  'from'   4    'from'
