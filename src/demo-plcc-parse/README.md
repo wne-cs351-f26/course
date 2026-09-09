@@ -126,9 +126,29 @@ You have met this idea before. In A1, `skip` versus `token` was *matched, then
 not emitted*. This is *matched, then not kept*. Both times the thing has to be
 in the input; both times you choose whether it survives into the next phase.
 
-It is why grammars discard punctuation. Commas, semicolons, parentheses — they
-are there to make the notation readable for a human, and they are noise to
-whatever runs the program afterward.
+### The part that actually matters: *why* you would keep one and not the other
+
+The syntax is easy. Deciding **which symbols are worth keeping** is the real
+skill, and there is a test for it:
+
+> **How many different lexemes could this token match?**
+
+`NUM` matches `1`, `42`, `9999` — many. So if I tell you *"I matched a NUM,"*
+your very next question is **"which one?"** The token name alone does not tell
+you what you need.
+
+`COMMA` matches `,` and nothing else. If I tell you *"I matched a COMMA,"* you
+have **no further questions**. The name already told you everything.
+
+**Keep the ones you would still have questions about.** Later, when you write
+semantics — the code that gives a program meaning — it will need the actual
+digits that `NUM` matched in order to do anything with them. It will never need
+to ask what the comma was.
+
+That is why punctuation usually goes bare: commas, semicolons, parentheses,
+keywords like `then` and `do`. They have exactly one possible lexeme each. They
+have to *be there* for the input to be legal, and once that is checked they have
+nothing left to say.
 
 ## 3 — Recursion, and the rule with nothing on the right
 
