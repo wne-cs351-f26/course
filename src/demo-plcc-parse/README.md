@@ -17,10 +17,10 @@ here counts.
 We worked through this in class. This is the same thing with the tool in front
 of you, so you can run it yourself instead of watching me run it.
 
-It is also where **A2** starts. The shape in `spec.plcc` — recursion with an
-empty alternative — is the shape A2 question 5 asks you to write, and the class
-diagram in section 6 is what A2 questions 1 through 3 are about. Play with it
-here first, where being wrong is free.
+The two ideas it is built around — **recursion with an empty alternative**, and
+**the classes a grammar defines** — are the ones everything after this leans on.
+You will write grammars of your own soon enough. Play with them here first, where
+being wrong is free.
 
 If you have not done the scanner sandbox yet, do that one first:
 `begin demo-plcc-scan`. This one picks up where it stops.
@@ -182,7 +182,8 @@ PASS
 ```
 
 Nothing but `PASS` or `FAIL` — the diagnostics go to stdout, so `>/dev/null`
-silences everything. **A2 tells you to test exactly this way.** This is why.
+silences everything. **This is how you test a parser**: by exit status, not by
+eye. It starts mattering the moment you have more than one input to check.
 
 ## 5 — A grammar that is right, and still refused
 
@@ -222,8 +223,8 @@ and it is not allowed to look.
 a new non-terminal. That is where `<ListTail>` came from. The grammar in
 `spec.plcc` is this one, repaired.
 
-Read that error message closely. When you hit this in A2 — and you will — it
-tells you what to do.
+Read that error message closely. When you hit this writing a grammar of your
+own — and you will — it tells you what to do.
 
 ## 6 — See the classes your grammar defines
 
@@ -254,9 +255,9 @@ Match it against the grammar line by line:
 - several rules with the same left-hand side make the left-hand side abstract
   and each alternative a subclass
 
-**A2 questions 1 through 3 ask you to do this by hand**, from a grammar rule to
-a class and its fields. Run `plcc-diagram` on a rule you are unsure about and
-check yourself.
+**Going from a grammar rule to its class and fields, by hand, is the skill
+here** — the diagram is how you check yourself, not a substitute for being able
+to do it. Run `plcc-diagram` on a rule you are unsure about and see.
 
 > **If `syntax.png` says *Syntax error!*, it is not your fault.** That happens
 > for grammars with an empty alternative — `spec.plcc`, `cap.plcc`, and
@@ -304,10 +305,10 @@ drawn as an actual loop:
 $ plcc-diagram -s rep.plcc
 ```
 
-So why did we do it the hard way first? Two reasons. `**=` is shorthand for
-exactly the recursion in section 3, so it is worth knowing what it stands for.
-And **A2 question 5 forbids it** — you build the shape by hand once before you
-are allowed the shortcut.
+So why did we do it the hard way first? `**=` is shorthand for exactly the
+recursion in section 3, and shorthand you cannot expand is hard to debug when a
+grammar does not do what you expected. **Be able to write the long form before
+you reach for the short one.**
 
 ## Now break it yourself
 
