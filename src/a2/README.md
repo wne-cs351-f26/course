@@ -1,4 +1,116 @@
-# CS351 - Assignment A2
+# CS351 - Assignment a2
+
+## Purpose
+
+A1 was about the first phase: turning characters into tokens. This assignment
+is the other two — turning tokens into **structure**, and giving that structure
+**meaning** — and it ends with the first real language of the course, `V0`,
+which every later language is built by extending.
+
+The idea underneath both phases is the one A1 started: a language is something
+you *specify*. A grammar specifies which token sequences are programs, and the
+parser PLCC generates from it says *yes* or *no* — and when it says yes, it
+hands you a tree. But *yes* is all it says. What a program **does** is a
+separate decision, written as Python methods on classes that PLCC generates
+*from the grammar*.
+
+You are not being asked to design languages yet. From here on we will define a
+series of small languages together, syntax and semantics for each construct,
+and your job in this assignment is to be ready to **read** them: given a
+specification, predict what the scanner, the parser, and the interpreter will
+do with an input — and when one of them reports an error, say what is probably
+wrong and where in the specification to look.
+
+### Reading
+
+From the [course textbook](https://ourplcc.github.io/course-materials-ng/dev/):
+[Syntax](https://ourplcc.github.io/course-materials-ng/dev/04-syntax/),
+[Semantic](https://ourplcc.github.io/course-materials-ng/dev/05-semantic/), and
+[V0](https://ourplcc.github.io/course-materials-ng/dev/06-v0/).
+
+**The two sandboxes** we used in class, `demo-plcc-parse` and `demo-plcc-rep`,
+are the same material with the tool in front of you. Work through both before
+starting. Every question below assumes you have.
+
+### What you will be able to do
+
+1. **Place the three phases.** Say what each of scanning, parsing, and
+   semantic analysis takes in and hands on, and, given an error message, say
+   which phase produced it.
+
+2. **Predict what the parser does.** Given a grammar and an input, say whether
+   the input parses and draw the tree it produces. Given a rejected input,
+   say where the parse stopped and what it expected.
+
+3. **Read a grammar rule as a class.** For any rule, name the class it
+   defines, say whether it is abstract or a subclass, and list its attributes
+   with their names and types — then check yourself with `plcc-diagram`.
+
+4. **Predict what the interpreter does.** Given a specification with a
+   semantic section and an input, trace the methods that run, in order, and
+   say what is printed. Say what changes in the output, and what does not,
+   when only the semantic section is changed.
+
+5. **Diagnose a specification that does not build or does not run.** From
+   the error, say what kind of mistake it is — a grammar PLCC refuses, a
+   missing or misnamed attribute, a method that is not there or returns the
+   wrong kind of thing — and which section to look in.
+
+6. **Read `V0`.** Say what a `V0` program means, which rule each part of it
+   matched, and how its semantics walks the tree to print it back.
+
+### The core concepts
+
+These are what the Correctness criterion looks at. Details — a tree drawn
+with slightly different indentation, a class named from memory instead of
+from the diagram — are worth a comment from me but cost you nothing. These
+are what matter:
+
+- **Syntax versus semantics, made concrete.** The parser decides whether
+  `1, 2, 3` is a program; it does not decide what the program does. The same
+  grammar can carry any meaning. A student who has this can say what changes
+  and what does not when only the semantic section changes.
+
+- **Terminal, non-terminal, rule, start symbol.** A terminal is a token from
+  the lexical section; a non-terminal is defined by rules; the start symbol is
+  the left-hand side of the first rule, and the root of every tree.
+
+- **Capture.** `<X>` keeps the symbol as an attribute; bare `X` requires it and
+  throws it away. That is why the commas are not in the tree.
+
+- **Recursion and the empty alternative.** A rule that mentions itself
+  describes any length; the alternative with nothing on the right is where it
+  stops — in the tree, and in the code that walks it.
+
+- **Grammar → class → attributes.** One class per rule, named for the
+  left-hand side or its suffix; a left-hand side with several rules is
+  abstract, one subclass per alternative. One attribute per captured symbol:
+  a token gives a `Token` whose `.lexeme` is a **string**; a non-terminal
+  gives an instance of its class; a `**=` symbol gives a Python list named
+  `xList`. This is what makes `self.num` and `self.listTail` readable.
+
+- **What a syntax error is.** Not "the parser got confused" — the specific
+  situation where the next token fits no rule, and the parser telling you
+  where, what it expected, and what it got. A tree printed above the error
+  does not mean it parsed: read to the end.
+
+- **A grammar can be right and still be refused.** *Describes the language*
+  and *parseable by this method* are different properties. When PLCC reports
+  an LL(1) conflict, the error names the rules and the fix.
+
+### Where this leads
+
+A3 makes the tree *evaluate* itself. `V0` only prints its input back; the next
+languages compute with it, and to do that they need **environments** — the
+machinery for what a name means at a given point in a program. That is the
+subject of the two weeks after this assignment goes out, and every `V` after
+`V0` is `V0` plus one idea. Writing grammars and semantics of your own comes
+later, once you have read several.
+
+On Exam 1, this material shows up as things you can only do by having run
+them: draw the tree a grammar produces for an input, name the class and
+attributes a rule defines, trace what an interpreter prints, and say what a
+given error means and where you would look.
 
 ## QUESTION 1
 
