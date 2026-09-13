@@ -1,0 +1,34 @@
+# The three grammar rules for question 1 are the ones marked below. The rest
+# of this file exists only so that the specification is complete enough for
+# PLCC to build it. Nothing about this language means anything, and the
+# semantic section is deliberately empty: no methods, so nothing runs -- but
+# PLCC still generates the classes, which is what you are here to look at.
+skip  WS          '\s+'
+token THIS        'this'
+token IS          'is'
+token EACH        'each'
+token HAS         'has'
+token MULTIPLE    'multiple'
+token OCCURRENCES 'occurrences'
+token ME          'me'
+token AM          'am'
+token TAKING      'taking'
+token AND         'and'
+token VAR         '\$\w+'
+token OF          'of'
+token CSIT        'CS\d+'
+token DOT         '\.'
+%
+<Start:One>    ::= <Blah>
+<Start:Two>    ::= <Many>
+<Start:Three>  ::= <Classes>
+
+<Blah:Goo>     ::= THIS <VAR> IS <Silly>                                   # (a)
+<Many>         **= EACH <Rule> HAS MULTIPLE OCCURRENCES <OF> <Stuff>       # (b)
+<Classes>      ::= ME AM TAKING <CSIT:c1> <CSIT:c2> AND <CSIT:c3>          # (c)
+
+<Silly>        ::= DOT
+<Rule>         ::= DOT
+<Stuff>        ::= DOT
+%
+Python

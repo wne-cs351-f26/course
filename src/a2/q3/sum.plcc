@@ -1,0 +1,32 @@
+# LONN again. Meaning: the sum of the numbers in the list.
+# The grammar, Lonn._run, and Done.sum are written. More.sum is yours.
+skip  WS     '\s+'
+token LPAREN '\('
+token RPAREN '\)'
+token NUM    '\d+'
+%
+<Lonn>       ::= LPAREN <NUM> <Nums> RPAREN
+<Nums:More>  ::= <NUM> <Nums>
+<Nums:Done>  ::=
+%
+Python
+
+Lonn
+%%%
+def _run(self):
+    first = int(self.num.lexeme)
+    return str(self.nums.sum(first))
+%%%
+
+More
+%%%
+def sum(self, total):
+    # Replace this line with your method body.
+    pass
+%%%
+
+Done
+%%%
+def sum(self, total):
+    return total
+%%%

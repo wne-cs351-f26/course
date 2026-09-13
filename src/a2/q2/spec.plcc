@@ -1,0 +1,9 @@
+# Balanced parentheses, terminated by an at-sign.
+skip  WS     '\s+'
+token LPAREN '\('
+token RPAREN '\)'
+token AT     '@'
+%
+<Start>          ::= <Balanced> AT
+<Balanced:Pair>  ::= LPAREN <Balanced:inside> RPAREN <Balanced:after>
+<Balanced:Empty> ::=

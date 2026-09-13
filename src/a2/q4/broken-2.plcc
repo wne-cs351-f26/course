@@ -1,0 +1,33 @@
+# One of five broken specifications for question 4. Same language as q3/min.plcc.
+skip  WS     '\s+'
+token LPAREN '\('
+token RPAREN '\)'
+token NUM    '\d+'
+%
+<Lonn>       ::= LPAREN <NUM> <Nums> RPAREN
+<Nums:More>  ::= <NUM> <NUM> <Nums>
+<Nums:Done>  ::=
+%
+Python
+
+Lonn
+%%%
+def _run(self):
+    first = int(self.num.lexeme)
+    return str(self.nums.min(first))
+%%%
+
+More
+%%%
+def min(self, best):
+    n = int(self.num.lexeme)
+    if n < best:
+        best = n
+    return self.nums.min(best)
+%%%
+
+Done
+%%%
+def min(self, best):
+    return best
+%%%
