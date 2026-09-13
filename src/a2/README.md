@@ -44,7 +44,8 @@ starting. Every question below assumes you have.
 
 3. **Read a grammar rule as a class.** For any rule, name the class it
    defines, say whether it is abstract or a subclass, and list its attributes
-   with their names and types — then check yourself with `plcc-diagram`.
+   with their names and types — then check yourself against the code PLCC
+   generates.
 
 4. **Predict what the interpreter does.** Given a specification with a
    semantic section and an input, trace the methods that run, in order, and
@@ -506,9 +507,10 @@ in each case? (You do not have to make the change; say what it would take.)
 Replace this line with your answer.
 ```
 
-**(e)** `3 + 4` prints `3` on one line and an error on the next. Explain both
-lines: why `3` was printed at all, and what the parser was looking at when it
-gave up.
+**(e)** Run `3 + 4` through `plcc-rep` this time. It prints `3` on one line
+and an error on the next. Explain both lines: why `3` was printed at all, and
+what the parser was looking at when it gave up. (The `plcc-parse` output
+from (a) shows the same thing as two trees; explain how they line up.)
 
 ### ANSWER
 
