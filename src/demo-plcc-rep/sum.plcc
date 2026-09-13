@@ -1,0 +1,40 @@
+# Lexical specification for a list of comma-separated natural numbers
+skip  WHITESPACE '\s+'
+token NUM        '\d+'
+token COMMA      ','
+
+%
+
+# Syntactic specification for a list of comma-separated natural numbers
+<List>          ::= <NUM> <ListTail>
+<ListTail:Some> ::= COMMA <NUM> <ListTail>
+<ListTail:Zero> ::=
+
+%
+
+# Semantic specification for a list of comma-separated natural numbers:
+# Compute the sum of the numbers
+
+Python
+
+List
+%%%
+def _run(self):
+    n = int(self.num.lexeme)
+    sum = n + self.listTail.eval()
+    return str(sum)
+%%%
+
+Some
+%%%
+def eval(self):
+    n = int(self.num.lexeme)
+    sum = n + self.listTail.eval()
+    return sum
+%%%
+
+Zero
+%%%
+def eval(self):
+    return 0
+%%%

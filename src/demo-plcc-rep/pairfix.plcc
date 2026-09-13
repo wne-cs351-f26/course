@@ -1,0 +1,18 @@
+# A pair of numbers, with the two NUMs told apart by suffix.
+skip  WHITESPACE '\s+'
+token NUM        '\d+'
+token COMMA      ','
+
+%
+
+<Pair> ::= <NUM:m> COMMA <NUM:n>
+
+%
+
+Python
+
+Pair
+%%%
+def _run(self):
+    return f'A pair containing {self.m.lexeme} and {self.n.lexeme}'
+%%%

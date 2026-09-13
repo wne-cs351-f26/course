@@ -1,0 +1,18 @@
+# A pair of numbers. This specification has a mistake in it — see the README.
+skip  WHITESPACE '\s+'
+token NUM        '\d+'
+token COMMA      ','
+
+%
+
+<Pair> ::= <NUM> COMMA <NUM>
+
+%
+
+Python
+
+Pair
+%%%
+def _run(self):
+    return f'A pair containing {self.num.lexeme} and {self.num.lexeme}'
+%%%

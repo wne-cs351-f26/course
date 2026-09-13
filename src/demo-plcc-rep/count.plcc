@@ -1,0 +1,37 @@
+# Lexical specification for a list of comma-separated natural numbers
+skip  WHITESPACE '\s+'
+token NUM        '\d+'
+token COMMA      ','
+
+%
+
+# Syntactic specification for a list of comma-separated natural numbers
+<List>          ::= <NUM> <ListTail>
+<ListTail:Some> ::= COMMA <NUM> <ListTail>
+<ListTail:Zero> ::=
+
+%
+
+# Semantic specification for a list of comma-separated natural numbers:
+# Count the numbers
+
+Python
+
+List
+%%%
+def _run(self):
+    count = 1 + self.listTail.eval()
+    return str(count)
+%%%
+
+Some
+%%%
+def eval(self):
+    return 1 + self.listTail.eval()
+%%%
+
+Zero
+%%%
+def eval(self):
+    return 0
+%%%

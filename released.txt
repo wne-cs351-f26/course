@@ -28,3 +28,4 @@ a1
 # Ungraded sandboxes. Nothing in them is submitted; `begin -f` resets them.
 demo-plcc-scan
 demo-plcc-parse
+demo-plcc-rep

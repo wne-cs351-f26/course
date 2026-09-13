@@ -1,0 +1,22 @@
+# The same list, written with the repetition metasymbol from the parse sandbox.
+# One rule, one class, one loop.
+skip  WHITESPACE '\s+'
+token NUM        '\d+'
+token COMMA      ','
+
+%
+
+<List> **= <NUM> +COMMA
+
+%
+
+Python
+
+List
+%%%
+def _run(self):
+    sum = 0
+    for n in self.numList:
+        sum += int(n.lexeme)
+    return str(sum)
+%%%
