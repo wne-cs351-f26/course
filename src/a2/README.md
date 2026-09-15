@@ -28,9 +28,9 @@ From the [course textbook](https://ourplcc.github.io/course-materials-ng/dev/):
 [Semantic](https://ourplcc.github.io/course-materials-ng/dev/05-semantic/), and
 [V0](https://ourplcc.github.io/course-materials-ng/dev/06-v0/).
 
-**The two sandboxes** we used in class, `demo-plcc-parse` and `demo-plcc-rep`,
-are the same material with the tool in front of you. Work through both before
-starting. Every question below assumes you have.
+**The three sandboxes** we used in class, `demo-plcc-parse`, `demo-plcc-rep`,
+and `demo-v0`, are the same material with the tool in front of you. Work
+through them before starting. Every question below assumes you have.
 
 ### What you will be able to do
 
@@ -472,11 +472,44 @@ echo '+(4, -(5, 2))' | plcc-parse -s spec.plcc
 Replace this line with your answer.
 ```
 
-**(b)** Look at the tree for `+(4, -(5, 2))`. Two things about it are worth
-explaining from the grammar: `AddPrim` is printed `(empty)` even though the
-input had a `+` in it, and `Rands` has its two expressions as direct children
-rather than as a chain like `More` / `More` / `Done` in question 3. Explain
-both.
+**(b)** `V0` spends four token lines and five grammar rules on its operators.
+Here is another way to write the same language. Copy `spec.plcc` to
+`oneprim.plcc` and make exactly these changes: replace the four operator
+tokens with one, in the same place,
+
+```
+token PRIMOP '\+|-|add1|sub1'
+```
+
+change `PrimappExp` to capture it directly,
+
+```
+<Exp:PrimappExp> ::= <PRIMOP> LPAREN <Rands> RPAREN
+```
+
+and delete the four `<Prim:…>` rules. Leave the semantic section alone.
+
+Then answer these four, in order:
+
+1. **Before running anything**, predict the `plcc-parse` tree for
+   `+(4, -(5, 2))` under `oneprim.plcc`. Say what appears where
+   `AddPrim (empty)` was, and explain from the two grammars why one design
+   prints `(empty)` there and the other does not. Then run it and check.
+
+2. Run `plcc-rep -s oneprim.plcc` on the same input. It fails. Say which
+   attribute of which class it is looking for and why that attribute is no
+   longer there.
+
+3. Give the one-line change to `PrimappExp.__str__` that makes it print
+   `+(4,-(5,2))` again. Make the change and confirm.
+
+4. The question the exercise is for. Both specifications accept exactly the
+   same programs and print exactly the same output. In each, *where* is the
+   fact that this operator is `+` and not `-` — what holds it, and what kind
+   of thing is it? Now suppose each operator had to do something different —
+   actually add, actually subtract. In the original `V0`, which class would
+   the code for `+` go in? In `oneprim.plcc`, where would it have to go, and
+   what would that code look like?
 
 ### ANSWER
 

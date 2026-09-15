@@ -1,0 +1,81 @@
+# Language V0: the lexical and syntactic sections from the textbook chapter,
+# plus the semantic section the chapter points at. Its meaning is to print
+# the program back.
+# primitive expressions
+skip WHITESPACE '\s+'
+skip COMMENT '%.*'
+token LIT '\d+'
+token LPAREN '\('
+token RPAREN '\)'
+token COMMA ','
+token ADDOP '\+'
+token SUBOP '\-'
+token ADD1OP 'add1'
+token SUB1OP 'sub1'
+token SYMBOL '[A-Za-z]\w*'
+%
+<Program>        ::= <Exp>
+<Exp:LitExp>     ::= <LIT>
+<Exp:VarExp>     ::= <SYMBOL>
+<Exp:PrimappExp> ::= <Prim> LPAREN <Rands> RPAREN
+<Rands>          **= <Exp> +COMMA
+<Prim:AddPrim>   ::= ADDOP
+<Prim:SubPrim>   ::= SUBOP
+<Prim:Add1Prim>  ::= ADD1OP
+<Prim:Sub1Prim>  ::= SUB1OP
+%
+Python
+
+Program
+%%%
+def _run(self):
+    return str(self.exp)
+%%%
+
+PrimappExp
+%%%
+def __str__(self):
+    return f"{self.prim}({self.rands})"
+%%%
+
+Rands
+%%%
+def __str__(self):
+    return ",".join(str(e) for e in self.expList)
+%%%
+
+LitExp
+%%%
+def __str__(self):
+    return self.lit.lexeme
+%%%
+
+VarExp
+%%%
+def __str__(self):
+    return self.symbol.lexeme
+%%%
+
+AddPrim
+%%%
+def __str__(self):
+    return "+"
+%%%
+
+SubPrim
+%%%
+def __str__(self):
+    return "-"
+%%%
+
+Add1Prim
+%%%
+def __str__(self):
+    return "add1"
+%%%
+
+Sub1Prim
+%%%
+def __str__(self):
+    return "sub1"
+%%%
