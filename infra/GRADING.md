@@ -52,10 +52,13 @@ something I can actually help with.
 
 | | |
 |---|---|
-| **3** | Yes. |
-| **2** | A core concept is misunderstood. |
-| **1** | Multiple key understandings are missing. |
+| **3** | Your understanding of the core concepts is nearly perfect. |
+| **2** | Your understanding is solid, but not nearly perfect. |
+| **1** | You are struggling, but some understanding is evident. |
 | **0** | Little or no understanding of the core concepts is evident. |
+
+This is one judgment about the work as a whole, not a checklist with a
+deduction for each concept.
 
 This is about **concepts, not details**. Every assignment handout names the core
 concepts it is built around, in its Purpose section. Those are what this
