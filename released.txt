@@ -31,3 +31,4 @@ demo-plcc-scan
 demo-plcc-parse
 demo-plcc-rep
 demo-v0
+languages

@@ -1,0 +1,16 @@
+letrec
+  d = proc(x)
+        let
+          y = 1
+        in
+          +(x,y)
+in
+  .d(3)
+
+letrec
+  d = let
+        y = 1
+      in
+        proc(x) +(x,y)
+in
+  .d(3)
