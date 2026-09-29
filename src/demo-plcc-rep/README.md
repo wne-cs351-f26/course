@@ -51,8 +51,9 @@ remembered inside it. If a command surprises you, check `pwd` first.
 | `input.txt` | `1, 2, 3` in a file. |
 
 > **`-s` is sticky**, as before. Pass it explicitly every time below and it
-> cannot surprise you. **Switching specifications rebuilds `plcc-ng/`**, so
-> anything in there — including diagrams — is regenerated from the new one.
+> cannot surprise you. **Switching specifications empties `plcc-ng/`**, and
+> each command puts back only what it needs: `plcc-diagram` the diagrams,
+> `plcc-rep` the Python.
 
 ## 1 — Run it
 
@@ -141,9 +142,13 @@ Open `plcc-ng/diagram/class.png` (in Codespaces, click it in the Explorer).
 `List` has fields `num` and `listTail`. `ListTail` is abstract; `Some` and
 `Zero` extend it. `Zero` has no fields.
 
-Now look at the actual Python PLCC generated:
+Now look at the actual Python PLCC generated. `plcc-diagram` only draws, and
+you last ran `count.plcc`, so there is no Python for `sum.plcc` yet. Run it
+once, then read it:
 
 ```console
+$ echo "1, 2, 3" | plcc-rep -s sum.plcc
+6
 $ cat plcc-ng/Python/List.py
 ```
 
