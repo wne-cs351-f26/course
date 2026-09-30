@@ -202,8 +202,9 @@ you add. Nothing the course does will ever overwrite it. The one exception is
 `begin -f`, which you have to ask for by name; it says what it is about to
 discard before it does it.
 
-**Everything else belongs to the course** — `README.md`, `GRADING.md`, this
-file, `.gitignore`, and the `.devcontainer` and `.vscode` directories. Every
+**Everything else belongs to the course** — `README.md`, `GRADING.md`,
+`DRAWINGS.md`, this file, `.gitignore`, and the `.devcontainer`, `.vscode`, and
+`drawings` directories. Every
 time you run `begin`, those are refreshed from the course repository. If I fix a
 mistake in the grading document, you get the fix automatically.
 

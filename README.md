@@ -6,8 +6,9 @@ Public. Holds assignment starter code and the student CLI.
   into a student's repository.
 - `bin/` — the `begin` and `save` commands.
 - `infra/` — course-controlled files: the devcontainer, editor config,
-  `.gitignore`, the repository README, [`WORKFLOW.md`](infra/WORKFLOW.md)
-  and [`GRADING.md`](infra/GRADING.md). Seeded into a student's repository
+  `.gitignore`, the repository README, [`WORKFLOW.md`](infra/WORKFLOW.md),
+  [`GRADING.md`](infra/GRADING.md), and [`DRAWINGS.md`](infra/DRAWINGS.md)
+  with its example images in `drawings/`. Seeded into a student's repository
   root at creation and refreshed on every `begin`, so a correction reaches
   every student without them doing anything.
 

@@ -25,6 +25,7 @@
 # Fall 2026
 a1
 a2
+a3
 
 # Ungraded sandboxes. Nothing in them is submitted; `begin -f` resets them.
 demo-plcc-scan

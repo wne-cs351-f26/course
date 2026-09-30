@@ -1,34 +1,154 @@
-CS351 - Assignment A3
-=====================
+# CS351 - Assignment a3
 
-Relevant slides: Slides 3 up to and including those for V5.
+## Purpose
 
-Continue the practices established in the first two assignments for organizing
-and submitting your work.
+A2 ended with `V0`, a language that prints its program back. This assignment
+covers the four languages that make programs **compute**: `V1` gives
+expressions values, `V2` adds a choice, `V3` lets a program name its own
+values, and `V4` adds procedures. What makes them work is the **environment**:
+a chain of bindings that answers "what does this name mean here?"
 
-## ENVIRONMENT DIAGRAMS
+Each language is the previous one plus one idea. So the skill this assignment
+builds is tracing: given a program, say which environment each part is
+evaluated in, what every name looks up to, and what comes out. When the
+answer surprises you, say which line of the semantics is responsible.
 
-In the first several questions you will draw environment diagrams.
-You may use a diagram editor or draw them by hand.
-However you draw them, you need to submit them as one of the following
-file types: png, jpeg, or pdf. Each diagram must be in a separate file.
-The name of the file must start with the question number: e.g.,
-1.png, 2.png, etc. Place your files in the same directory as this file.
+This is the last assignment before Exam 1.
 
-If you draw your answer by hand, be sure that your image is legable. You may
-want to trace over your lines using a sharpie to make the lines clear.
+### Reading
 
-The defined language for all of these questions is V5.
+From the [course textbook](https://ourplcc.github.io/course-materials-ng/dev/):
+[Environments](https://ourplcc.github.io/course-materials-ng/dev/07-environments/),
+[V1](https://ourplcc.github.io/course-materials-ng/dev/08-v1/),
+[V2](https://ourplcc.github.io/course-materials-ng/dev/09-v2/),
+[V3](https://ourplcc.github.io/course-materials-ng/dev/10-v3/), and
+[V4](https://ourplcc.github.io/course-materials-ng/dev/11-v4/).
+
+**The `languages` sandbox** (`begin languages`) has every one of these
+languages, ready to run. Questions 1, 3, and 4 use it directly.
+
+### What you will be able to do
+
+1. **Draw the environment an expression is evaluated in.** For any `V1`–`V4`
+   program, draw that environment's whole chain: every node, its bindings, its
+   parent, and the environment any `ProcVal` in it saved.
+
+2. **Predict what a program prints, and explain it from the chain.** Including
+   shadowing, a name that is out of scope, and a right-hand side that sees the
+   *old* binding.
+
+3. **Add a primitive.** Extend a language with a new operator: the token, the
+   grammar rule, and the `apply` method.
+
+4. **Trace a procedure application.** Say what a `ProcVal` holds, which
+   environment an application extends, and why a name that is free in a
+   procedure's body finds the binding from where the procedure was *defined*.
+
+### The core concepts
+
+These are what the Correctness criterion looks at. Details, such as how your
+diagram is laid out or whether you call a `proc` a function, are worth a
+comment from me but cost you nothing. These are what matter:
+
+- **An environment is a chain.** Each node holds bindings and points to its
+  parent. Lookup starts at the node it is asked, stops at the first hit, and
+  fails only at `EnvNull`. Nothing checks ahead of time that a name is bound:
+  an unbound name fails only when it is looked up.
+
+- **Only `let` and procedure application make new environments.** Primitives,
+  `if`, and sequences evaluate in the environment they were given.
+
+- **Operands are evaluated first.** Prims and procedures receive values:
+  every operand is evaluated *before* `apply` runs. `if` is different. It
+  evaluates only the branch it takes.
+
+- **`let` evaluates every right-hand side in the old environment**, then
+  binds them all at once in a new node that extends it. The body is evaluated
+  in the new node. A binding can be seen only inside the body of its `let`:
+  that is its **scope**. An inner binding of the same name **shadows** an
+  outer one without changing it.
+
+- **A binding names a value.** Nothing in `V1`–`V4` changes a binding.
+
+- **A `proc` is a value that carries its environment.** A `ProcVal` holds the
+  formals, the body, and the environment the `proc` was evaluated in. That
+  is what makes it a **closure**. Applying it extends *that* environment, not
+  the one it is called from.
+
+### Where this leads
+
+`V5` makes recursion part of the language instead of a trick you write by
+hand, as in Question 4. `V6` and the languages after it let a program
+*change* a binding. That is the first time the order of evaluation can change
+the answer, and every idea in this assignment is what you will reason with
+when it does.
+
+On Exam 1, this material shows up as the same things you do here: draw the
+environments, trace a program, say what prints and why.
+
+## How to do this assignment
+
+**Your answers go in this file.** Every question has one or more `ANSWER`
+blocks that look like this:
+
+````
+```
+Replace this line with your answer.
+```
+````
+
+Replace that line with your answer and leave the fences around it alone.
+
+**Predict first, then run.** Write the prediction down before you run
+anything. Then run it and say whether you were right. The prediction is where
+the learning is; the run is only the check. A wrong prediction followed by an
+honest correction is a complete answer.
+
+**Every path in this handout is relative to `src/a3/`.**
+
+To run a program in a language from the sandbox:
+
+```bash
+cd ../languages/V3/python      # from src/a3/
+echo 'let x = 3 in add1(x)' | plcc-rep
+```
+
+or run `plcc-rep` with no input and type or paste programs. A program can
+span several lines, and `plcc-rep` starts the next program wherever the last
+one ended. Ctrl-D ends it.
+
+Question 2 has its own directory, `q2/`, laid out like the sandbox:
+`grammar.plcc`, then `python/spec.plcc`. Run `plcc-rep` from the `python/`
+directory. Edit only `q2/NEG/grammar.plcc` and `q2/NEG/python/spec.plcc`.
+Leave `q2/Env/` alone: it is the environment code NEG includes.
+
+### Drawings
+
+Questions 1 and 4 ask you to **draw** environments. Draw them by hand, in the
+notation from class, and hand them in as images. **Read
+[How to Hand In a Drawing](../../DRAWINGS.md) first.** It says how to name the
+files and where to put them, and it has four worked examples.
+
+Every drawing question asks for **the environment some expression is evaluated
+in**. Draw that environment's whole chain. The empty environment a `V3` or `V4`
+program starts in is optional.
+
+How this is scored is the same as A1 and A2: [GRADING.md](../../GRADING.md),
+three criteria, nine points. The **core concepts** listed above are what
+Correctness looks at.
+
+When you are done, run `save` from anywhere in your repository. **Your work is
+not submitted until `save` has run.** It is safe to run as often as you like.
 
 
-### Question 1
+## QUESTION 1 — Draw the chain
 
-Draw a diagram of the all environments that are created during the
-evaluation of the following expression.  You may assume that the initial
-environment is empty.
+Use `V3` (`../languages/V3/python`). For (a), (b), and (d): **predict** what
+the program prints, **draw the environment its innermost body is evaluated
+in**, then run it and check the value. Name the drawing for the part, such as
+`q1a.jpg`, and write the file name in the answer block.
 
-> TIP: Remember only let expressions and proc applications create
-> new bindings and extend environments. Pimitive operations do not.
+**(a)**
 
 ```
 let
@@ -39,10 +159,15 @@ in
   +(x,+(y,z))
 ```
 
-### Question 2
+### ANSWER — (a)
 
-Repeat the above with the following expression.
+```
+Replace this line with your answer.
+```
 
+**(b)**
+
+```
 let
   x = 3
 in
@@ -53,75 +178,200 @@ in
       z = 8
     in
       +(x,+(y,z))
+```
 
+### ANSWER — (b)
 
-### Question 3
+```
+Replace this line with your answer.
+```
 
-Repeat the above with the following expression.
+**(c)** (a) and (b) print the same value, but they build different chains.
+In **both** programs, change the right-hand side of `y` from `5` to
+`add1(x)`, and change nothing else. Predict both, then run both. Explain the
+difference using your drawings for (a) and (b). No new drawing is needed.
 
-> TIP: Be sure to show the environments created by proc applications.
+### ANSWER — (c)
+
+```
+Replace this line with your answer.
+```
+
+**(d)**
 
 ```
 let
-  x = 3
+  q = 6
 in
   let
-    p = proc(t) +(t,x)
+    q = 60
+    y = q
   in
-    .p(5)
+    y
+```
+
+Draw the environment the innermost body, `y`, is evaluated in. Then quote
+the **one line** of `LetDecls.addBindings` (in
+`../languages/V3/python/spec.plcc`) that decides which `q` the right-hand side
+sees, and say in a sentence what it does.
+
+### ANSWER — (d)
+
+```
+Replace this line with your answer.
 ```
 
 
-### Question 4
+## QUESTION 2 — Add a primitive
 
-Repeat the above with the following expression:
+`q2/NEG/` is a copy of `V1`. Before changing anything, run `neg(3)` in it:
 
-> TIP: Be sure to show the environments created by proc applications.
+```bash
+cd q2/NEG/python      # from src/a3/
+echo 'neg(3)' | plcc-rep
+```
 
-> TIP: Notice that the inner-inner let evaluates to a ProcVal!
+**(a)** It prints two lines. Explain both. What token did the scanner make
+from `neg`? What did the parser think `neg` was, and why did the next program
+fail at the `(`? Which phase produced each line?
+
+### ANSWER — (a)
+
+```
+Replace this line with your answer.
+```
+
+**(b)** Add a `neg` primitive that takes one argument and returns its
+arithmetic negative:
+
+```
+neg(add1(3))      % -4
+neg(neg(42))      % 42
+```
+
+You will need a `NEGOP` token in `grammar.plcc`, a grammar rule for a
+`NegPrim`, and an `apply` method for `NegPrim` in `python/spec.plcc`. The
+other prims show you the pattern. Then answer: **where does the token go in
+the lexical section, and why does its position matter?**
+
+### ANSWER — (b)
+
+```
+Replace this line with your answer.
+```
+
+**(c)** Change the `LIT` token so a literal can begin with an optional minus
+sign. With your change:
+
+```
+neg(-11)          % 11
+add1(-12)         % -11
+```
+
+Then predict, and check, what `-(4,-1)` prints. There are two `-`
+characters in it. Say which token each one becomes, and why the scanner
+can tell them apart.
+
+### ANSWER — (c)
+
+```
+Replace this line with your answer.
+```
+
+Paste your `NegPrim` section and your changed lines from `grammar.plcc` here,
+as well as leaving them in the files.
+
+### ANSWER — (code)
+
+```
+Replace this line with your answer.
+```
+
+
+## QUESTION 3 — Scope
+
+Use `V3`. For each program: **predict** the output, then run it. Then
+**explain** the output from the environment chain. A drawing is not required.
+If one helps you explain, hand it in as [DRAWINGS.md](../../DRAWINGS.md)
+says, named for the program, such as `q3a.jpg`.
+
+```
+(a)  let y = 5 in +(let y = sub1(y) in y, y)
+(b)  let x = let y = 2 in add1(y) in y
+(c)  let a = 2 in let b = a in let a = 50 in +(a, b)
+(d)  let x = y y = 2 in x
+(e)  let x = 1 x = 2 in x
+```
+
+For (e), name the method that raises the message.
+
+### ANSWER
+
+```
+Replace this line with your answer.
+```
+
+
+## QUESTION 4 — Procedures
+
+Use `V4` (`../languages/V4/python`).
+
+**(a)** Predict what this prints, then run it:
 
 ```
 let
-  t = 3
+  n = 10
 in
   let
-    f = let
-          x = t
-        in
-	        proc(t) +(t,x)
+    g = proc(k) *(k,n)
   in
-    .f(5)
+    .g(4)
 ```
 
+For the application `.g(4)`, draw the environment `g`'s body is evaluated
+in, and the environment `.g(4)` itself is evaluated in, with the value of `g`.
+Both go in one drawing, `q4a.jpg`, as in the last two examples in
+[DRAWINGS.md](../../DRAWINGS.md). Then say in a sentence which environment
+the application **extends**.
 
-### Question 5
-
-> TIP: Be sure to show the environments created by proc applications,
->      even the recursive calls!
+### ANSWER — (a)
 
 ```
-letrec
-  sumi = proc(x) {
-    if x
-    then +(x, .sumi(sub1(x)))
-    else 0
-  }
+Replace this line with your answer.
+```
+
+**(b)** Now add one more `let` between the definition and the application:
+
+```
+let
+  n = 10
 in
-  .sumi(1)
+  let
+    g = proc(k) *(k,n)
+  in
+    let
+      n = 100
+    in
+      .g(4)
 ```
 
-## QUESTION 6
+Predict and run. Draw the same two environments as in (a), in `q4b.jpg`.
+Then point to the line in `ProcVal.apply` (in
+`../languages/V4/python/spec.plcc`) that decides which `n` the body sees, and
+say what one change to that line would make the program print the *other*
+value you might have expected.
 
-We have provided an algorithm that shows how a 'let ... in ... ' expression can
-be replaced by a procedure application. Carry out this algorithm with the
-following expression by writing a procedure application that is equivalent to
-the given expression. Use the algorithm ONLY to replace all 'let ... in ... '
-expressions. Do not make any other changes to the given expression. Your answer
-should not have any 'let's.
+### ANSWER — (b)
 
-> NOTE: You are strongly encouraged to use V4 to evaluate both the original
-> expression and your 'let' removal conversion expression to be sure that they
-> both evaluate to the same thing.
+```
+Replace this line with your answer.
+```
+
+**(c)** A `let` is an applied `proc` in disguise. The textbook gives the rule:
+`let V1 = E1 ... Vn = En in B` means the same as
+`.proc(V1, ..., Vn) B (E1, ..., En)`. Rewrite each program below using the
+rule so that it has **no `let`s**, and make no other change. Run the original
+and your rewrite to check that they print the same value.
 
 ```
 let
@@ -131,15 +381,6 @@ let
 in
   +(x,+(y,z))
 ```
-
-## ANSWER
-
-
-
-## QUESTION 7
-
-Repeat the above with the following expression:
-
 
 ```
 let
@@ -151,156 +392,72 @@ in
     +(x,+(y,2))
 ```
 
-[Hint: work from the inside out.]
+Hint for the second one: work from the inside out.
 
-## ANSWER
-
-
-
-## QUESTION 8 (NEG)
-
-`./NEG` contains a copy of the V1 language. Add a `neg` primitive that takes a single
-argument and returns the value of its arithmetic negative.  For example, the
-expression
+### ANSWER — (c)
 
 ```
-neg(add1(3))
+Replace this line with your answer.
 ```
 
-evaluates to -4, and
-
-```
-neg(neg(42))
-```
-
-evaluates to 42.
-
-You will need to modify the `grammar` file by adding a `NEGOP` token and
-creating a grammar rule for the `NegPrim` primitive.  You will also need to
-modify the `prim` file so that it will handle the `apply` semantics in the
-`NegPrim` class.  Observe that this primitive takes a single argument.
-
-Also, modify the specification of the `LIT` token in your NEG grammar so that a
-literal can begin with an optional minus sign, with the obvious interpretation.
-For example, both of the following expressions evaluate to 11:
-
-```
-neg(-11)
-add1(10)
-```
-
-## QUESTION 9 (MACRO)
-
-`./MACRO/` contains a copy of V5. You will modify code in `./MACRO/` to
-answer this question.
-
-From our Chapter 3 class notes, you have seen that a procedure expression (a
-ProcExp) evaluates to a closure (a ProcVal) that captures the environment in
-which the procedure is evaluated (i.e., defined).  Consider this example:
-
+**(d)** This program looks like it should compute 4 factorial:
 
 ```
 let
-  x = 3
+  fact = proc(x) if zero?(x) then 1 else *(x, .fact(sub1(x)))
 in
-  let
-    p = proc(t) +(t,x)
-  in
-    let
-      x = 42
-    in
-      .p(5)
+  .fact(4)
 ```
 
-Using static scope rules, the x variable that occurs free in the proc body will
-evaluate to 3 when the body is evaluated, since the body is evaluated in the
-environment captured where the procedure is defined, which has x bound to 3.
+Run it. Explain the error from **which environment the `ProcVal` saved**, and
+why `fact` is not in it.
 
-Another approach to dealing with variables that occur free in a procedure body
-is to use their bindings where the procedure is *applied* rather than where the
-procedure is *defined*.  This approach is called dynamic scope rules, to
-distinguish it from static scope rules.
-
-We want to maintain the static scoping behavior of procedures, so to implement
-dynamic scope rules we will introduce the notion of a "macro".  A macro
-application behaves exactly like a procedure application except that the
-bindings of variables that occur free in the body of a macro are obtained in
-the environment in which the macro is applied instead of the environment in
-which the macro is defined.  Considering this, the following example evaluates
-to 47:
+Then write `sumto`, which adds the numbers from `n` down to `0`, using the
+textbook's workaround of passing the procedure to itself. This should
+print `10`:
 
 ```
 let
-  x = 3
+  sumto = ...
 in
-  let
-    m = macro(t) +(t,x)
-  in
-    let
-      x = 42
-    in
-      .m(5)
+  .sumto(sumto, 4)
 ```
 
-Specifically, the procedure application .m(5) appears in an environment where x
-is bound to 42, so the variable x that occurs free in the body of m therefore
-evaluates to 42 in this application.  The entire expression evaluates to 47.
-
-Now let's discuss the implementation of this macro feature (remember you'll be
-modifying the code in `./MACRO/`).
-
-Since a macro doesn't capture the environment in which it is defined (unlike a
-procedure), we can define a MacroVal object to be exactly like a ProcVal
-object, except that it does not have an Env field.  Modify your val file to add
-a MacroVal class to do this -- copy the ProcVal class, re-name it to MacroVal,
-remove the Env field, and appropriately modify the constructor.
-
-You will need to modify your grammar so that its lexical specification includes
-the MACRO token.  Add an `<exp>` grammar rule that is exactly like a ProcExp
-except that it is named MacroExp and it has `<macro>` on its RHS.  Similarly,
-add a `<macro>` grammar rule that looks exactly like the `<proc>` grammar rule
-except that its RHS starts with MACRO instead of PROC.
-
-In your code file, add a MacroExp section that behaves exactly like the ProcExp
-section except that you call macro.makeMacro() instead of
-proc.makeClosure(env).  The reason that you don't pass env in the makeMacro
-method is that a MacroVal doesn't capture its defining environment.
-
-In your code file, add a Macro section that looks exactly like the Proc section
-except that it defines the makeMacro method.  This method has no parameters and
-simply returns a new MacroVal object, passing it the formals and exp fields --
-remember, there's no Env parameter for a MacroVal.
-
-The only place that now needs fixing is the apply method in the MacroVal class.
-Assuming that you copied the apply method from the ProcVal class into the
-MacroVal class, you need to see how to modify this so that apply will properly
-behave as a macro.  You will need to modify ONLY TWO CHARACTERS in this
-definition to make it work properly.
-
-At this point you should be able to compile everything and test your new
-language.  Use the above examples to make sure it works as advertised.
-
-Here's another observation that should cement the difference between procedures
-and macros.  Since a macro application uses current bindings for variables that
-occur free in its body, a macro can refer to itself without having to use the
-"letrec trick" for procedure bindings.  Thus the following definition works:
+### ANSWER — (d)
 
 ```
-let
-  f = macro(t) if t then *(t, .f(sub1(t))) else 1
-in
-  .f(5) % returns 120
+Replace this line with your answer.
 ```
 
-Although f occurs free in the macro body, by the time .f(5) is evaluated, f is
-bound to the macro, and the occurrence of f in the macro body is now
-(dynamically) bound.
+**(e)** Sequences. Predict, then run:
 
-Macros are inherently dangerous, however, since it's hard to reason about
-programs that use dynamic scope rules -- you can never depend on what value
-might be bound to a variable that occurs free in the macro body by examining
-the static properties of the code.
+```
+{ 1 ; 2 ; 3 }
+{ /(1,0) ; 5 }
+let x = 1 in { let x = 2 in x ; x }
+```
 
-You can test your implementation using the expressions above.  You should
-create other examples of test expressions that show the differences between
-procedure and macro applications.
+Read `SeqExp.eval`. In `V4`, an expression before the last one in a sequence
+can never change the answer, only stop it. Why? What would a language need
+before those earlier expressions could matter?
+
+### ANSWER — (e)
+
+```
+Replace this line with your answer.
+```
+
+
+## Before you run `save`
+
+- [ ] Every `ANSWER` block has an answer in it. An unanswered block reads as
+      skipped work under **Completeness**.
+- [ ] `q2/NEG/`: `neg` works, negative literals work, and your changes are
+      pasted into Question 2.
+- [ ] Your drawings, `q1a`, `q1b`, `q1d`, `q4a`, and `q4b`, are in this
+      directory, and each answer block names its file.
+- [ ] You ran `save`. **Nothing is submitted until you have**, and it is safe
+      to run as often as you like.
+
+`plcc-ng/` directories are build caches. Leaving them in place costs you
+nothing.

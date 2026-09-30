@@ -39,6 +39,9 @@ only inside a temporary container.
 
 Both are already in this repository, refreshed every time `begin` runs.
 
+When a question asks you to draw something, read
+**[How to Hand In a Drawing](DRAWINGS.md)** first.
+
 ## What is yours, and what is not
 
 **Everything under `src/` is your work** — the assignments you fetch with
