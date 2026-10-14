@@ -1,0 +1,6 @@
+define counter =
+  proc()
+    let
+      x = 0
+    in
+      set x = add1(x)

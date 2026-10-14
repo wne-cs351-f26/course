@@ -1,0 +1,6 @@
+define counter =
+  let
+    x = 0
+    next = proc(t) set t = add1(t)
+  in
+    proc() .next(x)

@@ -1,0 +1,6 @@
+define counter =
+  letrec
+    x = 0
+    next = proc() set x = add1(x)
+  in
+    next
