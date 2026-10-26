@@ -26,6 +26,7 @@
 a1
 a2
 a3
+a4
 
 # Ungraded sandboxes. Nothing in them is submitted; `begin -f` resets them.
 demo-plcc-scan
