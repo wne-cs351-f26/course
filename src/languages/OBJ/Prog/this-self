@@ -1,0 +1,9 @@
+letrec
+  o = <new class extends class field x end field x end>{ set x=3 ; this }
+  s = <<o>super>{ set x=5 ; this}
+in
+  { display [<<s>this>x, <<s>self>x]
+  ; newline
+  ; display [<<o>this>x, <<o>self>x]
+  ; newline
+  }

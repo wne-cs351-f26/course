@@ -1,0 +1,11 @@
+define c = 
+  class
+    static init = proc(x) <new c>{set <o>x = x ; o}
+    field x
+  end
+
+let
+  x = 5
+in 
+  <.<c>init(x)>x
+

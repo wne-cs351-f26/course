@@ -1,4 +1,4 @@
-# CS351 - The languages, `V0` to `NEED`
+# CS351 - The languages, `V0` to `OBJ`
 
 **Nothing here is graded and nothing here is submitted.** This is a sandbox:
 the reference implementations of the languages we study, for you to run, read,
@@ -29,7 +29,8 @@ let x = 3 in let x = add1(x) y = add1(x) in +(x, y)
 ```
 
 The languages run in the order we study them: `V0` to `V6`, then `SET`, `REF`,
-`NAME`, and `NEED`. `V4`, `V6`, and the last four have a `Prog/` directory of
+`NAME`, `NEED`, `TYPE0`, `TYPE1`, and `OBJ`. `V4`, `V6`, and everything from
+`SET` on except `TYPE0` have a `Prog/` directory of
 example programs.
 
 ## How it is laid out

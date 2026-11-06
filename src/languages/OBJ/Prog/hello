@@ -1,0 +1,34 @@
+define charList = class
+  field fst 
+  field rst
+  method init = proc(l, r) {set fst = l ; set rst = r ; self}
+  method charAdd = proc(x) .<new myclass>init(x, self)
+  method print = proc()
+     if fst
+     then {.<rst>print() ; putc fst}
+     else self
+  method println = proc()
+    {.print() ; newline ; self}
+end
+
+!<new charList> charAdd('H)
+              > charAdd('e)
+              > charAdd('l)
+              > charAdd('l)
+              > charAdd('o)
+              > charAdd(' )
+              > charAdd('w)
+              > charAdd('o)
+              > charAdd('r)
+              > charAdd('l)
+              > charAdd('d)
+              > println()
+              > println()
+              > println()
+              > println()
+              > println()
+              > println()
+!>
+
+{putc '* ; puts "Hello world" ; putc '* ; newline}
+
