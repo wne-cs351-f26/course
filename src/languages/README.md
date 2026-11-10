@@ -59,5 +59,5 @@ and its includes break.
 ## Where this comes from
 
 A copy of [ourPLCC/languages-ng](https://github.com/ourPLCC/languages-ng) at
-tag `v1.0.0` — the version the textbook links to — with its automated tests
-left out. It is licensed under the GNU GPL version 3; see `LICENSE`.
+tag `v1.0.1`, with its automated tests left out. It is licensed under the GNU
+GPL version 3; see `LICENSE`.
